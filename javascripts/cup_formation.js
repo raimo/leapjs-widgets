@@ -1,15 +1,11 @@
 (function () {
   "use strict";
 
-  var applaudeSound = document.getElementById('applaude');
-  applaudeSound.addEventListener('ended', function() { applaudeSound.load(); });
-
-  window.Player = function (options) {
+  window.CupFormation = function (options) {
     this.options = options;
     this.index = options.index;
-    this.side = options.side; // 1 or -1
+    this.side = options.side;
     this.handOffset = options.handOffset;
-    this.handQuaternion = options.handQuaternion;
 
     if (this.side == 'far'){
       this.rotation = new THREE.Vector3(-1, 1, -1)
@@ -26,18 +22,12 @@
     this.cups = [];
   }
 
-  window.Player.prototype.placementNoise = function () {
+  window.CupFormation.prototype.placementNoise = function () {
     return 0;
   }
 
-  Player.prototype.setCamera = function(){
-    window.camera.position = this.options.cameraPosition;
-    window.camera.lookAt(new THREE.Vector3(0, 0, 0));
-  }
-
-
   // adds a threejs object
-  Player.prototype.addCup = function () {
+  CupFormation.prototype.addCup = function () {
     var player = this;
     var cylinder = new Physijs.CylinderMesh(Game.cupGeometry, Game.cupMaterial, 0);
     var bottom = new THREE.Mesh(Game.cupBottomGeometry, Game.cupMaterial);
@@ -56,7 +46,6 @@
         pongBall.setLinearVelocity({x:0,y:0,z:0});
         $('#player' + player.index + ' .cups').append('<img src="images/cup.png">');
         if (cylinder.position.z > 0) {
-          boo.play();
           if (player.cups.length === 0) {
             Game.overlay('You lose', function() {
               Game.reset();
@@ -68,7 +57,6 @@
               Game.reset();
             });
           }
-          applaudeSound.play();
         }
       }
     });
@@ -85,7 +73,7 @@
     return cylinder;
   };
 
-  Player.prototype.addCupOffsetBy = function (offset) {
+  CupFormation.prototype.addCupOffsetBy = function (offset) {
     var previousPosition = this.cups[this.cups.length - 1]
     var cup = this.addCup();
     cup.position.copy(this.pointPosition);
@@ -101,19 +89,19 @@
 
   var cupPlacementDistance = 6;
 
-  Player.prototype.rightwardCupOffset = function () {
+  CupFormation.prototype.rightwardCupOffset = function () {
     return new THREE.Vector3(Game.cupPlacementDistance, 0, 0).multiply(this.rotation);
   }
 
-  Player.prototype.downwardCupOffset = function () {
+  CupFormation.prototype.downwardCupOffset = function () {
     return new THREE.Vector3(0, 0, Game.cupPlacementDistance).multiply(this.rotation);
   }
 
-  Player.prototype.lastCup = function () {
+  CupFormation.prototype.lastCup = function () {
     return this.cups[this.cups.length - 1]
   }
 
-  Player.prototype.sixCupFormation = function () {
+  CupFormation.prototype.sixCupFormation = function () {
     this.addCupOffsetBy(); // top
     this.addCupOffsetBy(this.rightwardCupOffset().add(this.downwardCupOffset()));
     this.addCupOffsetBy(this.rightwardCupOffset().multiplyScalar(-1).add(this.downwardCupOffset()));
@@ -123,7 +111,7 @@
     this.addCupOffsetBy(this.rightwardCupOffset().multiplyScalar(-2).add(this.downwardCupOffset().multiplyScalar(2)));
   }
 
-  Player.prototype.tenCupFormation = function () {
+  CupFormation.prototype.tenCupFormation = function () {
     this.sixCupFormation();
     this.addCupOffsetBy(this.downwardCupOffset().multiplyScalar(3).add(this.rightwardCupOffset().multiplyScalar(-3)));
     this.addCupOffsetBy(this.downwardCupOffset().multiplyScalar(3).add(this.rightwardCupOffset().multiplyScalar(-1)));
@@ -132,19 +120,18 @@
   }
 
   // todo: this would need to work with existing cups..
-  Player.prototype.ibeamFormation = function () {
+  CupFormation.prototype.ibeamFormation = function () {
     this.addCupOffsetBy();
     this.addCupOffsetBy(this.downwardCupOffset());
     this.addCupOffsetBy(this.downwardCupOffset());
   }
 
-  Player.prototype.resetCups = function () {
-    $('#player' + this.index + ' .cups').html('');
+  CupFormation.prototype.resetCups = function () {
     this.cups.forEach(function(e) {
       scene.remove(e);
     });
     this.cups = [];
-    this.tenCupFormation();
+    this.sixCupFormation();
   }
 
 

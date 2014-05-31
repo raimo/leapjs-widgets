@@ -1,10 +1,3 @@
-window.TO_RAD = Math.PI / 180;
-window.TO_DEG = 1 / TO_RAD;
-
-// wat
-var booSound = document.getElementById('boo');
-booSound.addEventListener('ended', function() { booSound.load(); });
-
 (window.controller = new Leap.Controller)
   .use('transform', {
     quaternion: function(hand){
@@ -32,19 +25,9 @@ booSound.addEventListener('ended', function() { booSound.load(); });
   })
   .use('accumulate')
   .connect()
-  .use('playback')
   .on('frame', function(frame){
 
     var leapHand, handMesh;
-
-    document.getElementById('handsHud').innerHTML     = frame.hands.length;
-    document.getElementById('streamingHud').innerHTML = LeapHandler.streamingLocalFrames;
-    document.getElementById('firebaseHud').innerHTML  = Game.playerCount;
-
-    if (frame.valid && frame.local && !LeapHandler.streamingLocalFrames) {
-      LeapHandler.streamingLocalFrames = true;
-      LeapHandler.enableFrameSharing();
-    }
 
     if (!frame.hands[0]) return;
 
@@ -63,51 +46,7 @@ booSound.addEventListener('ended', function() { booSound.load(); });
       return current;
     });
 
-//    if (Game.isMyTurn()) {
       LeapHandler.trackThrow(leapHand, handMesh);
-//    }else{
-//      LeapHandler.followPhysics(frame);
-//    }
-    LeapHandler.updateHud(leapHand, handMesh);
-
   });
 
-// give a second to connect before immediately starting shared-frame-watching
-setTimeout(function () {
-  LeapHandler.updateSharedFramesLoop();
-}, 1000);
-
-controller.on('disconnect',         function(){ LeapHandler.streamingLocalFrames = false; LeapHandler.updateSharedFramesLoop(); });
-controller.on('deviceDisconnected', function(){ LeapHandler.streamingLocalFrames = false; LeapHandler.updateSharedFramesLoop(); });
-
-LeapHandler.playback = controller.plugins.playback.player;
-
-var goToGame = function() {
-  $('#main-menu').hide();
-  $('#players').show();
-  Game.reset();
-};
-$('#new-game').click(goToGame);
-$('#multiplayer').click(function() {
-  $('#main-menu .new-game').hide();
-  $('#main-menu')
-    .css('text-shadow', '-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black')
-    .css('color', '#f0a700')
-  .append('Share this URL with your date before selecting "Multiplayer".');
-  $('<input />').appendTo('#main-menu').val(window.location.href).css('width', '100%').click(function() {
-    $(this).focus().select();
-  });
-  $('#multiplayer').parent().remove().appendTo($('#main-menu'));
-  $('#multiplayer').click(goToGame);
-});
-$('#players').hide();
 Game.begin();
-
-
-// http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
-function getParam(name) {
-    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-        results = regex.exec(location.search);
-    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-}

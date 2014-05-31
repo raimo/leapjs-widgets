@@ -15,7 +15,7 @@
   Game.beerMaterial = new THREE.MeshPhongMaterial({map: THREE.ImageUtils.loadTexture('beer.jpg')});
 
 
-  Game.player1 = new Player({
+  Game.player1 = new CupFormation({
     side: 'near',
     index: 1,
     handOffset: (new THREE.Vector3(0, 0, 200)),
@@ -26,7 +26,7 @@
   p2camPos = (new THREE.Vector3).fromArray(camera.defaultPosition);
   p2camPos.z = p2camPos.z * -1;
 
-  Game.player2 = new Player({
+  Game.player2 = new CupFormation({
     side: 'far',
     index: 2,
     handOffset: (new THREE.Vector3(0, 0, -200)),

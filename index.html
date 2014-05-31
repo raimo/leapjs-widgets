@@ -4,118 +4,21 @@
     <title>Beer Pong</title>
     <link rel="stylesheet" href="stylesheets/main.css"/>
     <link rel="stylesheet" href="bower_components/sass-bootstrap/dist/css/bootstrap.min.css"/>
-    <script src="javascripts/lib/headtrackr.js"></script>
   </head>
   <body>
-    <div class="container" id="main-menu">
-      <img class="logo" src="images/logo.png" alt="BEER PONG">
-      <div class="new-game button">
-        <img src="images/new-game.png" alt="New Game" class="nonhover">
-        <img src="images/new-game-hover.png" id="new-game" alt="New Game" class="hover">
-      </div>
-      <div class="multiplayer button">
-        <img src="images/multiplayer.png" alt="Multiplayer" class="nonhover">
-        <img src="images/multiplayer-hover.png" id="multiplayer" alt="multiplayer" class="hover">
-      </div>
-    </div>
-    <div class="container" id="players">
-      <div class="row">
-        <div class="col-md-4" id="player1">
-          <h2><span class="name">Player 1</span><span class="turn">&nbsp;</span></h2>
-          <div class="cups"> </div>
-        </div>
-        <div class="col-md-4">
-        </div>
-        <div class="col-md-4" id="player2">
-          <h2><span class="name">Player 2</span><span class="turn">&nbsp;</span></h2>
-          <div class="cups"> </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="hud" onmousedown="event.stopPropagation();" class="debug">
-      <!-- this should be angular: -->
-      <table>
-        <tr>
-          <td>palmPosition</td>
-          <td id="palmPosition"></td>
-        </tr>
-        <tr>
-          <td>ballPosition</td>
-          <td id="ballPosition"></td>
-        </tr>
-        <tr>
-          <td>palmVelocity</td>
-          <td id="palmVelocity"></td>
-        </tr>
-        <tr>
-          <td>tipAvgVel</td>
-          <td id="tipAvgVel"></td>
-        </tr>
-        <tr>
-          <td>pinchStr</td>
-          <td id="pinchStr"></td>
-        </tr>
-        <tr>
-          <td>Frame Traffic</td>
-          <td id="frameTraffic"></td>
-        </tr>
-        <tr>
-          <td>Hands</td>
-          <td id="handsHud"></td>
-        </tr>
-        <tr>
-          <td>Streaming</td>
-          <td id="streamingHud"></td>
-        </tr>
-        <tr>
-          <td>Players</td>
-          <td id="firebaseHud"></td>
-        </tr>
-        <tr>
-          <td>Latency</td>
-          <td id="latencyHud"></td>
-        </tr>
-        <tr>
-          <td>Incoming FPS</td>
-          <td id="incomingFPSHud"></td>
-        </tr>
-        <tr>
-          <td>Turn Bounces</td>
-          <td id="turnBounces"></td>
-        </tr>
-      </table>
-    </div>
-    <audio id="collision" preload="auto"><source src="audio/collision.ogg" /></audio>
-    <audio id="boo" preload="auto"><source src="audio/boo.ogg" /></audio>
-    <audio id="applaude" preload="auto"><source src="audio/applaude.ogg" /></audio>
-
     <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
     <script type="text/javascript" src="javascripts/lib/three.js"></script>
-
     <script type="text/javascript" src="javascripts/lib/physi.js"></script>
-
-    <!-- cannon demo deps -->
-    <script type="text/javascript" src="javascripts/lib/THREE.colorutils.js"></script>
     <script type="text/javascript" src="javascripts/lib/Detector.js"></script>
-
-    <script type="text/javascript" src="javascripts/lib/dat.gui.js"></script>
-    <!-- todo: replace these with something leap-enabled! -->
     <script type="text/javascript" src="javascripts/lib/TrackballControls.js"></script>
-    <!-- todo: use skeletal beta2 -->
-    <!-- includes fixed `use` with fingers -->
     <script type="text/javascript" src="javascripts/lib/leap-0.6.0-beta1-custom.js"></script>
-    <!-- includes fixed hand data with fingers-->
     <script type="text/javascript" src="javascripts/lib/leap-plugins-0.1.4.1-custom.js"></script>
-    <!--<script type="text/javascript" src="javascripts/lib/leap.playback-0.1.0.js"></script>-->
-
     <script type="text/javascript" src="javascripts/lib/leap.transform.js"></script>
     <script type="text/javascript" src="javascripts/lib/leap.rigged-hand-0.1.0-custom.js"></script>
     <script type="text/javascript" src="javascripts/leap.accumulate.js"></script>
     <script type="text/javascript" src="javascripts/scene.js"></script>
-    <script type="text/javascript" src="javascripts/player.js"></script>
+    <script type="text/javascript" src="javascripts/cup_formation.js"></script>
     <script type="text/javascript" src="javascripts/game.js"></script>
-    <script type="text/javascript" src="javascripts/gui.js"></script>
     <script type="text/javascript" src="javascripts/leap.js"></script>
     <script type="text/javascript" src="javascripts/beer-pong.js"></script>
 
