@@ -10,7 +10,6 @@
       scene.simulate( undefined, 2 );
     }
   );
-  sceneCube = new THREE.Scene();
   renderer = new THREE.WebGLRenderer({alpha: true, antialias: true});
 
   renderer.shadowMapEnabled = true;
@@ -41,7 +40,6 @@
   camera.defaultPosition = [0, 26, 60];
   camera.position.fromArray(camera.defaultPosition);
   camera.lookAt(new THREE.Vector3(0, 0, 0));
-  cameraCube = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 100000 );
 
   var videoInput = document.getElementById('inputVideo');
   var canvasInput = document.getElementById('inputCanvas');
@@ -185,36 +183,6 @@
   pongBall.castShadow = true;
   scene.add(pongBall);
 
-
-  var cubemap = window.location.href.charCodeAt(window.location.href.length-1) % 2 === 0 ? 'beach' : 'tenerife';
-  var path = "textures/"+cubemap+"/";
-  var format = '.jpg';
-  var urls = [
-      path + 'px' + format, path + 'nx' + format,
-      path + 'py' + format, path + 'ny' + format,
-      path + 'pz' + format, path + 'nz' + format
-  ];
-
-  var textureCube = THREE.ImageUtils.loadTextureCube( urls );
-
-  // Skybox
-
-  var shader = THREE.ShaderLib[ "cube" ];
-  shader.uniforms[ "tCube" ].value = textureCube;
-
-  var material = new THREE.ShaderMaterial( {
-
-      fragmentShader: shader.fragmentShader,
-      vertexShader: shader.vertexShader,
-      uniforms: shader.uniforms,
-      depthWrite: false,
-      side: THREE.BackSide
-
-  });
-
-  var boxMesh = new THREE.Mesh( new THREE.BoxGeometry( 100, 100, 100 ), material );
-  sceneCube.add( boxMesh );
-
   window.addEventListener( 'resize', function onWindowResize() {
       windowHalfX = window.innerWidth / 2,
       windowHalfY = window.innerHeight / 2,
@@ -222,8 +190,6 @@
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
 
-      cameraCube.aspect = window.innerWidth / window.innerHeight;
-      cameraCube.updateProjectionMatrix();
 
       renderer.setSize( window.innerWidth, window.innerHeight );
   }, false );
@@ -234,7 +200,6 @@
 
   window.render = function() {
 
-    cameraCube.rotation.copy( camera.rotation );
     controls.update();
 
     var lostHeight = -10;
@@ -242,17 +207,11 @@
       booSound.play();
       pongBall.belowTable = true;
 
-      Game.toggleTurn();
     } else if (pongBall.position.y >= lostHeight && pongBall.belowTable) {
       pongBall.belowTable = false;
     }
 
-
-    ballPositionHud.innerHTML = pongBall.position.toArray().map(function(num){return Math.round(num)});
-    frameTrafficHud.innerHTML = Game.framesSent +  '/' + Game.framesReceived;
-
     scene.simulate();
-    renderer.render(sceneCube, cameraCube);
     renderer.render(scene, camera);
     requestAnimationFrame(render);
   };
