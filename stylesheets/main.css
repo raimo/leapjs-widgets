@@ -1,0 +1,92 @@
+body {
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 14px; }
+
+#hud {
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: #222;
+  color: #eee;
+  min-width: 150px;
+  padding: 10px;
+  z-index: 10; }
+
+.debug {
+  visibility: hidden; }
+
+#navbar {
+  position: relative;
+  z-index: 3;
+  background: none;
+  border: 0; }
+  #navbar h1 {
+    float: left;
+    color: white;
+    -moz-text-shadow: 3px 3px 8px #81d41e;
+    -webkit-text-shadow: 3px 3px 8px #81d41e;
+    text-shadow: 3px 3px 8px #81d41e; }
+  #navbar button {
+    opacity: 0.6; }
+
+.overlay {
+  position: fixed;
+  top: 40%;
+  font-size: 35pt;
+  color: #00bafa;
+  text-align: center;
+  left: 0;
+  right: 0; }
+
+#leapjsbadge {
+  position: fixed;
+  z-index: 10;
+  bottom: 10px;
+  left: 10px; }
+
+#firebasebadge {
+  position: fixed;
+  z-index: 10;
+  bottom: 10px;
+  left: 148px; }
+
+video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  opacity: 0.2; }
+
+div {
+  position: relative;
+  z-index: 3;
+  color: white;
+  font-size: 13pt;
+  font-weight: bold; }
+  div#main-menu {
+    margin-top: 150px;
+    z-index: 6;
+    margin-left: auto;
+    margin-right: auto;
+    width: 300px; }
+    div#main-menu img {
+      width: 300px; }
+      div#main-menu img.logo {
+        margin-bottom: 30px; }
+    div#main-menu .button .nonhover {
+      display: block; }
+    div#main-menu .button .hover {
+      cursor: pointer;
+      display: none; }
+    div#main-menu .button:hover .nonhover {
+      display: none; }
+    div#main-menu .button:hover .hover {
+      display: block; }
+  div img {
+    width: 30px; }
+
+#begin-game {
+  position: relative;
+  z-index: 10;
+  color: white;
+  font-size: 13pt; }
