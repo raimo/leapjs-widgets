@@ -2,8 +2,6 @@
 <html>
   <head>
     <title>Beer Pong</title>
-    <link rel="stylesheet" href="stylesheets/main.css"/>
-    <link rel="stylesheet" href="bower_components/sass-bootstrap/dist/css/bootstrap.min.css"/>
   </head>
   <body>
     <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
@@ -39,18 +37,25 @@
           })
           .connect()
           .on('frame', function(frame){
-
-            var leapHand, handMesh;
-
-            if (!frame.hands[0]) return;
-
-            leapHand = frame.hands[0];
-            handMesh = leapHand.data('riggedHand.mesh');
-            leapHand.fingers.forEach(function(finger, i) {
-                var tip = finger.tipPosition;
-                var clonepos = fingerBalls[i].position.clone();
-                handMesh.scenePosition([tip[0], tip[1], tip[2]], clonepos);
-                fingerBalls[i].setLinearVelocity(clonepos.sub(fingerBalls[i].position).multiplyScalar(15));
+            frame.hands.forEach(function(leapHand) {
+                var handMesh = leapHand.data('riggedHand.mesh');
+                var fingerBalls = handMesh.fingerBalls = handMesh.fingerBalls || {};
+                leapHand.fingers.forEach(function(finger, i) {
+                    if (!fingerBalls[i]) {
+                      fingerBalls[i] = fingerBalls[i] || new Physijs.SphereMesh(
+                        new THREE.SphereGeometry(1, 32, 32),
+                        Physijs.createMaterial(new THREE.MeshPhongMaterial({color: 0x0000ff}), 1, 0.1),
+                        100
+                      );
+                      fingerBalls[i].visible = true;
+                      fingerBalls[i].castShadow = false;
+                      scene.add(fingerBalls[i]);
+                    }
+                    var tip = finger.tipPosition;
+                    var clonepos = fingerBalls[i].position.clone();
+                    handMesh.scenePosition([tip[0], tip[1], tip[2]], clonepos);
+                    fingerBalls[i].setLinearVelocity(clonepos.sub(fingerBalls[i].position).multiplyScalar(15));
+                });
             });
           });
     </script>

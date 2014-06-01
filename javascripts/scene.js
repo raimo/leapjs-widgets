@@ -2,7 +2,7 @@
   // this also appears to set the ammojs relative path:
   Physijs.scripts.worker = 'javascripts/lib/physijs_worker.js';
 
-  scene = new Physijs.Scene();
+  window.scene = new Physijs.Scene();
   scene.setGravity({x: 0, y: -100, z: 0});
   scene.addEventListener(
     'update',
@@ -10,7 +10,7 @@
       scene.simulate( undefined, 2 );
     }
   );
-  renderer = new THREE.WebGLRenderer({alpha: true, antialias: true});
+  window.renderer = new THREE.WebGLRenderer({alpha: true, antialias: true});
 
   renderer.shadowMapEnabled = true;
   renderer.shadowMapType = THREE.BasicShadowMap;
@@ -26,7 +26,7 @@
   renderer.domElement.style.width = '100%';
   renderer.domElement.style.height = '100%';
   renderer.domElement.style['z-index'] = 0;
-  $('body').prepend(renderer.domElement);
+  document.body.appendChild(renderer.domElement);
 //
 //  scene.add(new THREE.AmbientLight(0x888888));
 //
@@ -36,7 +36,7 @@
 //  scene.add(pointLight);
 
 
-  camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 1000);
+  window.camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 1000);
   camera.defaultPosition = [0, 26, 60];
   camera.position.fromArray(camera.defaultPosition);
   camera.lookAt(new THREE.Vector3(0, 0, 0));
@@ -131,19 +131,6 @@
 
 
 
-
-  window.fingerBalls = [];
-  for (var i = 0; i < 5; i++) {
-      fingerBalls[i] = new Physijs.SphereMesh(
-        // function ( radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength ) {
-        new THREE.SphereGeometry(1, 32, 32),
-        Physijs.createMaterial(new THREE.MeshPhongMaterial({color: 0x0000ff, opacity: 0, transparent: true}), 1, 0.1),
-        0.1
-      );
-      fingerBalls[i].visible = false;
-      fingerBalls[i].castShadow = false;
-      scene.add(fingerBalls[i]);
-  }
 
   window.addEventListener( 'resize', function onWindowResize() {
       windowHalfX = window.innerWidth / 2,
