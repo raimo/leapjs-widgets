@@ -1,14 +1,7 @@
 (window.controller = new Leap.Controller)
   .use('transform', {
-    quaternion: function(hand){
-      var player = Game.getPlayerById(hand.userId);
-      var quaternion = (player && player.options.handQuaternion) || Game.player1.options.handQuaternion;
-      return quaternion
-    },
     position: function(hand){
-      // these numbers are hardcoded in raw leap-space, not sure how to convert easily yet
-      var player = Game.getPlayerById(hand.userId);
-      return (player && player.options.handOffset)    || Game.player1.options.handOffset;
+      return new THREE.Vector3(0, 0, 200);
     }
   })
   .use('riggedHand', {
@@ -39,5 +32,3 @@
         pongBall.setLinearVelocity(clonepos.sub(pongBall.position).multiplyScalar(15));
     });
   });
-
-Game.begin();

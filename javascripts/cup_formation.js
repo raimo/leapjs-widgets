@@ -13,7 +13,6 @@
 
   window.CupFormation = function (options) {
     this.options = options;
-    this.index = options.index;
     this.side = options.side;
     this.handOffset = options.handOffset;
 
@@ -30,10 +29,7 @@
         scene.table.geometry.depth/2 - 20
     ).multiply(this.rotation);
     this.cups = [];
-  }
-
-  window.CupFormation.prototype.placementNoise = function () {
-    return 0;
+    this.resetCups();
   }
 
   // adds a threejs object
@@ -68,7 +64,7 @@
       cup.position.add(offset);
     }
     cup.__dirtyPosition = true;
-    return cup
+    return cup;
   }
 
 

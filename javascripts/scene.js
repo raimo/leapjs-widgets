@@ -95,7 +95,8 @@
 
   scene.add(scene.table);
 
-
+  new CupFormation({ side: 'near' });
+  new CupFormation({ side: 'far' });
 
   directionalLight = new THREE.SpotLight(0xffffff, 0.7);
   //directionalLight.shadowCameraVisible = true;
@@ -164,5 +165,6 @@
     renderer.render(scene, camera);
     requestAnimationFrame(render);
   };
+  window.render();
 
 }).call(this);
