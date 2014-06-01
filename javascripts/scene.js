@@ -137,10 +137,11 @@
       fingerBalls[i] = new Physijs.SphereMesh(
         // function ( radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength ) {
         new THREE.SphereGeometry(1, 32, 32),
-        Physijs.createMaterial(new THREE.MeshPhongMaterial(0x0000ff), 1, 0.1),
+        Physijs.createMaterial(new THREE.MeshPhongMaterial({color: 0x0000ff, opacity: 0, transparent: true}), 1, 0.1),
         0.1
       );
-      fingerBalls[i].castShadow = true;
+      fingerBalls[i].visible = false;
+      fingerBalls[i].castShadow = false;
       scene.add(fingerBalls[i]);
   }
 
