@@ -4,19 +4,16 @@
     <title>Beer Pong</title>
   </head>
   <body>
-    <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
-    <script type="text/javascript" src="bower_components/sass-bootstrap/dist/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="javascripts/lib/three.js"></script>
-    <script type="text/javascript" src="javascripts/lib/physi.js"></script>
-    <script type="text/javascript" src="javascripts/lib/Detector.js"></script>
-    <script type="text/javascript" src="javascripts/lib/TrackballControls.js"></script>
-    <script type="text/javascript" src="javascripts/lib/leap-0.6.0-beta1-custom.js"></script>
-    <script type="text/javascript" src="javascripts/lib/leap-plugins-0.1.4.1-custom.js"></script>
-    <script type="text/javascript" src="javascripts/lib/leap.transform.js"></script>
-    <script type="text/javascript" src="javascripts/lib/leap.rigged-hand-0.1.0-custom.js"></script>
-    <script type="text/javascript" src="javascripts/cup_formation.js"></script>
-    <script type="text/javascript" src="javascripts/scene.js"></script>
-    <script type="text/javascript">
+    <script src="javascripts/lib/three.js"></script>
+    <script src="javascripts/lib/physi.js"></script>
+    <script src="javascripts/lib/TrackballControls.js"></script>
+    <script src="//js.leapmotion.com/leap-0.6.0.min.js"></script>
+    <script src="//js.leapmotion.com/leap-plugins-0.1.6.min.js"></script>
+    <script src="javascripts/lib/leap.transform.js"></script>
+    <script src="//js.leapmotion.com/leap.rigged-hand-0.1.4.js"></script>
+    <script src="javascripts/cup_formation.js"></script>
+    <script src="javascripts/scene.js"></script>
+    <script>
         (window.controller = new Leap.Controller)
           .use('transform', {
             position: function(hand){
@@ -24,9 +21,11 @@
             }
           })
           .use('riggedHand', {
-            parent: window.scene,
-            positionScale: 2.5,
-            scale: 1.5,
+            scene: window.scene,
+            renderer: window.renderer,
+            camera: window.camera,
+            positionScale: 1,
+            scale: 0.5,
             boneColors: function(){
               return {
                 hue: 0.1,
