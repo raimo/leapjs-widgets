@@ -68,7 +68,7 @@
     new THREE.CubeGeometry(50, 1.8, 73),
     Physijs.createMaterial(new THREE.MeshPhongMaterial({
       color: 0x003000
-    }), 0.01, 0.9),
+    }), 1, 0.9),
     0
   );
   scene.table.receiveShadow = true;

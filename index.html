@@ -37,24 +37,27 @@
           })
           .connect()
           .on('frame', function(frame){
-            frame.hands.forEach(function(leapHand) {
+            window.fingerBalls = window.fingerBalls || {};
+            frame.hands.forEach(function(leapHand, i) {
+                fingerBalls[i] = fingerBalls[i] || {};
                 var handMesh = leapHand.data('riggedHand.mesh');
-                var fingerBalls = handMesh.fingerBalls = handMesh.fingerBalls || {};
-                leapHand.fingers.forEach(function(finger, i) {
-                    if (!fingerBalls[i]) {
-                      fingerBalls[i] = fingerBalls[i] || new Physijs.SphereMesh(
-                        new THREE.SphereGeometry(1, 32, 32),
-                        Physijs.createMaterial(new THREE.MeshPhongMaterial({color: 0x0000ff}), 1, 0.1),
-                        100
-                      );
-                      fingerBalls[i].visible = true;
-                      fingerBalls[i].castShadow = false;
-                      scene.add(fingerBalls[i]);
-                    }
-                    var tip = finger.tipPosition;
-                    var clonepos = fingerBalls[i].position.clone();
-                    handMesh.scenePosition([tip[0], tip[1], tip[2]], clonepos);
-                    fingerBalls[i].setLinearVelocity(clonepos.sub(fingerBalls[i].position).multiplyScalar(15));
+                leapHand.fingers.forEach(function(finger, j) {
+                    fingerBalls[i][j] = fingerBalls[i][j] || {};
+                    [finger.tipPosition, finger.dipPosition, finger.mcpPosition].forEach(function(tip,k) {
+                      if (!fingerBalls[i][j][k]) {
+                        fingerBalls[i][j][k] = fingerBalls[i][j][k] || new Physijs.SphereMesh(
+                          new THREE.SphereGeometry(0.6, 32, 32),
+                          Physijs.createMaterial(new THREE.MeshPhongMaterial({color: 0x0000ff}), 100, 0),
+                          100
+                        );
+                        fingerBalls[i][j][k].visible = false
+                        fingerBalls[i][j][k].castShadow = false;
+                        scene.add(fingerBalls[i][j][k]);
+                      }
+                      var clonepos = fingerBalls[i][j][k].position.clone();
+                      handMesh.scenePosition([tip[0], tip[1], tip[2]], clonepos);
+                      fingerBalls[i][j][k].setLinearVelocity(clonepos.sub(fingerBalls[i][j][k].position).multiplyScalar(15));
+                    });
                 });
             });
           });
