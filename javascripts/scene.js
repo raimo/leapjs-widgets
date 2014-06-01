@@ -136,24 +136,14 @@
     // function ( radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength ) {
     new THREE.SphereGeometry(1.4, 32, 32),
     Physijs.createMaterial(new THREE.MeshPhongMaterial(0x0000ff), 1, 0.8),
-    1
+    0.1
   );
   pongBall.reset = function() {
     pongBall.position.set(0,20,0);
-    pongBall.bouncesSinceTurnStart = 0;
-    pongBall.mass = 0;
+    pongBall.mass = 1;
     pongBall.setLinearVelocity({x:0,y:0,z:0});
     pongBall.__dirtyPosition = true;
   };
-  pongBall.release = function(){
-    this.inHand = false;
-    this.mass = 1;
-  }
-  pongBall.grab = function(){
-    this.bouncesSinceTurnStart = 0;
-    this.inHand = true;
-    pongBall.mass = 0;
-  }
   pongBall.setDamping(0.9,0.9);
 
   pongBall.castShadow = true;

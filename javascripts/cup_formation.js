@@ -1,6 +1,16 @@
 (function () {
   "use strict";
 
+  var cupRadius = 3;
+  var cupPlacementDistance = cupRadius * 1.7;
+  var cupGeometry = new THREE.CylinderGeometry(cupRadius, 0.8 * cupRadius, cupRadius * 2, 32, true);
+  var cupBottomGeometry = new THREE.CylinderGeometry(cupRadius * 0.8, cupRadius * 0.8, cupRadius * 0.4, 32, true);
+  var cupTopGeometry = new THREE.TorusGeometry(cupRadius, cupRadius*0.07, 32, 32, Math.PI*2);
+  var cupBeerGeometry = new THREE.CircleGeometry(cupRadius, 32);
+  var cupMaterial = Physijs.createMaterial(new THREE.MeshPhongMaterial({color: 0xff0000}), 1, 0.9);
+  var whiteMaterial = new THREE.MeshPhongMaterial({color: 0xffffff});
+  var beerMaterial = new THREE.MeshPhongMaterial({map: THREE.ImageUtils.loadTexture('beer.jpg')});
+
   window.CupFormation = function (options) {
     this.options = options;
     this.index = options.index;
@@ -16,7 +26,7 @@
     this.pointPosition = new THREE.Vector3(
       0,
       // is there a better way of getting table top-surface position?
-        scene.table.position.y + scene.table.geometry.height / 2 + Game.cupGeometry.height / 2,
+        scene.table.position.y + scene.table.geometry.height / 2 + cupGeometry.height / 2,
         scene.table.geometry.depth/2 - 20
     ).multiply(this.rotation);
     this.cups = [];
@@ -29,37 +39,12 @@
   // adds a threejs object
   CupFormation.prototype.addCup = function () {
     var player = this;
-    var cylinder = new Physijs.CylinderMesh(Game.cupGeometry, Game.cupMaterial, 0);
-    var bottom = new THREE.Mesh(Game.cupBottomGeometry, Game.cupMaterial);
-    var cupTop = new THREE.Mesh(Game.cupTopGeometry, Game.whiteMaterial);
-    var cupBeer = new THREE.Mesh(Game.cupBeerGeometry, Game.beerMaterial);
+    var cylinder = new Physijs.CylinderMesh(cupGeometry, cupMaterial, 1);
+    var bottom = new THREE.Mesh(cupBottomGeometry, cupMaterial);
+    var cupTop = new THREE.Mesh(cupTopGeometry, whiteMaterial);
+    var cupBeer = new THREE.Mesh(cupBeerGeometry, beerMaterial);
     cupTop.quaternion.setFromEuler(new THREE.Euler(Math.PI/2, 0, 0, 'XYZ')); 
     cupBeer.quaternion.setFromEuler(new THREE.Euler(-Math.PI/2, 0, 0, 'XYZ')); 
-    cylinder.addEventListener('collision', function(o, velocity) {
-      if (cylinder.position.y + cylinder.geometry.height/2 < o.position.y && cylinder.position.distanceTo(o.position) < 5.21) {
-        var cylinderIndex = player.cups.indexOf(cylinder);
-        if (cylinderIndex > -1) {
-          player.cups.splice(cylinderIndex, 1);
-        }
-
-        scene.remove(cylinder);
-        pongBall.setLinearVelocity({x:0,y:0,z:0});
-        $('#player' + player.index + ' .cups').append('<img src="images/cup.png">');
-        if (cylinder.position.z > 0) {
-          if (player.cups.length === 0) {
-            Game.overlay('You lose', function() {
-              Game.reset();
-            });
-          }
-        } else {
-          if (player.cups.length === 0) {
-            Game.overlay('You win', function() {
-              Game.reset();
-            });
-          }
-        }
-      }
-    });
     cupTop.position.set(0,3.2,0);
     cupBeer.position.set(0,3.1,0)
     bottom.position.set(0,-3,0);
@@ -90,11 +75,11 @@
   var cupPlacementDistance = 6;
 
   CupFormation.prototype.rightwardCupOffset = function () {
-    return new THREE.Vector3(Game.cupPlacementDistance, 0, 0).multiply(this.rotation);
+    return new THREE.Vector3(cupPlacementDistance, 0, 0).multiply(this.rotation);
   }
 
   CupFormation.prototype.downwardCupOffset = function () {
-    return new THREE.Vector3(0, 0, Game.cupPlacementDistance).multiply(this.rotation);
+    return new THREE.Vector3(0, 0, cupPlacementDistance).multiply(this.rotation);
   }
 
   CupFormation.prototype.lastCup = function () {
