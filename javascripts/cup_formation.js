@@ -41,9 +41,9 @@
     var cupBeer = new THREE.Mesh(cupBeerGeometry, beerMaterial);
     cupTop.quaternion.setFromEuler(new THREE.Euler(Math.PI/2, 0, 0, 'XYZ')); 
     cupBeer.quaternion.setFromEuler(new THREE.Euler(-Math.PI/2, 0, 0, 'XYZ')); 
-    cupTop.position.set(0,3.2,0);
-    cupBeer.position.set(0,3.1,0)
-    bottom.position.set(0,-3,0);
+    cupTop.position.set(0,cupRadius + 0.2,0);
+    cupBeer.position.set(0,cupRadius + 0.1,0)
+    bottom.position.set(0,-cupRadius,0);
 //   bottom.castShadow = cylinder.castShadow = true;
    bottom.receiveShadow = cylinder.receiveShadow = true;
     cylinder.add(cupBeer);
