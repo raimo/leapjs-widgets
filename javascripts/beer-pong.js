@@ -23,7 +23,6 @@
       }
     }
   })
-  .use('accumulate')
   .connect()
   .on('frame', function(frame){
 
@@ -33,20 +32,12 @@
 
     leapHand = frame.hands[0];
     handMesh = leapHand.data('riggedHand.mesh');
-
-
-    leapHand.velocity = leapHand.accumulate('palmVelocity', 10, function (historyTotal) {
-      var current = [0,0,0];
-      historyTotal.push(leapHand.palmVelocity);
-      for (var i = 0; i<historyTotal.length; i++) {
-        current[0] += historyTotal[i][0] * 0.02;
-        current[1] += historyTotal[i][1] * 0.02;
-        current[2] += historyTotal[i][2] * 0.02;
-      }
-      return current;
+    [leapHand.indexFinger.tipPosition, leapHand.thumb.tipPosition].forEach(function(finger, i) {
+        var clonepos = pongBall.position.clone();
+        handMesh.scenePosition([finger[0], finger[1], finger[2]], clonepos);
+        console.log(finger, i);
+        pongBall.setLinearVelocity(clonepos.sub(pongBall.position).multiplyScalar(15));
     });
-
-      LeapHandler.trackThrow(leapHand, handMesh);
   });
 
 Game.begin();

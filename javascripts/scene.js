@@ -138,12 +138,6 @@
     Physijs.createMaterial(new THREE.MeshPhongMaterial(0x0000ff), 1, 0.8),
     0.1
   );
-  pongBall.reset = function() {
-    pongBall.position.set(0,20,0);
-    pongBall.mass = 1;
-    pongBall.setLinearVelocity({x:0,y:0,z:0});
-    pongBall.__dirtyPosition = true;
-  };
   pongBall.setDamping(0.9,0.9);
 
   pongBall.castShadow = true;
