@@ -132,17 +132,17 @@
 
 
 
-
-  pongBall = new Physijs.SphereMesh(
-    // function ( radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength ) {
-    new THREE.SphereGeometry(1.4, 32, 32),
-    Physijs.createMaterial(new THREE.MeshPhongMaterial(0x0000ff), 1, 0.8),
-    0.1
-  );
-  pongBall.setDamping(0.9,0.9);
-
-  pongBall.castShadow = true;
-  scene.add(pongBall);
+  window.fingerBalls = [];
+  for (var i = 0; i < 5; i++) {
+      fingerBalls[i] = new Physijs.SphereMesh(
+        // function ( radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength ) {
+        new THREE.SphereGeometry(1, 32, 32),
+        Physijs.createMaterial(new THREE.MeshPhongMaterial(0x0000ff), 1, 0.1),
+        0.1
+      );
+      fingerBalls[i].castShadow = true;
+      scene.add(fingerBalls[i]);
+  }
 
   window.addEventListener( 'resize', function onWindowResize() {
       windowHalfX = window.innerWidth / 2,

@@ -18,6 +18,41 @@
     <script type="text/javascript" src="javascripts/lib/leap.rigged-hand-0.1.0-custom.js"></script>
     <script type="text/javascript" src="javascripts/cup_formation.js"></script>
     <script type="text/javascript" src="javascripts/scene.js"></script>
-    <script type="text/javascript" src="javascripts/beer-pong.js"></script>
+    <script type="text/javascript">
+        (window.controller = new Leap.Controller)
+          .use('transform', {
+            position: function(hand){
+              return new THREE.Vector3(0, 0, 200);
+            }
+          })
+          .use('riggedHand', {
+            parent: window.scene,
+            positionScale: 2.5,
+            scale: 1.5,
+            boneColors: function(){
+              return {
+                hue: 0.1,
+                saturation: 1,
+                lightness: 0.88
+              }
+            }
+          })
+          .connect()
+          .on('frame', function(frame){
+
+            var leapHand, handMesh;
+
+            if (!frame.hands[0]) return;
+
+            leapHand = frame.hands[0];
+            handMesh = leapHand.data('riggedHand.mesh');
+            leapHand.fingers.forEach(function(finger, i) {
+                var tip = finger.tipPosition;
+                var clonepos = fingerBalls[i].position.clone();
+                handMesh.scenePosition([tip[0], tip[1], tip[2]], clonepos);
+                fingerBalls[i].setLinearVelocity(clonepos.sub(fingerBalls[i].position).multiplyScalar(15));
+            });
+          });
+    </script>
   </body>
 </html>
