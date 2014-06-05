@@ -58,7 +58,6 @@
     var previousPosition = this.cups[this.cups.length - 1]
     var cup = this.addCup();
     cup.position.copy(this.pointPosition);
-    cup.position.y = 4.5;
 
     if (offset) {
       cup.position.add(offset);

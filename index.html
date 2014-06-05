@@ -52,9 +52,10 @@
                         );
                         fingerBalls[i][j][k].visible = false;
                         fingerBalls[i][j][k].castShadow = false;
+                        handMesh.scenePosition([tip[0], tip[1], tip[2]], fingerBalls[i][j][k].position);
                         scene.add(fingerBalls[i][j][k]);
                       }
-                      var clonepos = fingerBalls[i][j][k].position.clone();
+                      var clonepos = new THREE.Vector3();
                       handMesh.scenePosition([tip[0], tip[1], tip[2]], clonepos);
                       fingerBalls[i][j][k].setLinearVelocity(clonepos.sub(fingerBalls[i][j][k].position).multiplyScalar(15));
                     });

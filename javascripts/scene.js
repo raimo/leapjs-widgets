@@ -93,6 +93,15 @@
   backStripe.position.set(0,0.01,-scene.table.geometry.depth/2);
   scene.table.add(backStripe);
 
+  [-1,1].forEach(function(fac) {
+      var leg = new Physijs.BoxMesh(
+              new THREE.CubeGeometry(scene.table.geometry.width, 1, 1),
+              Physijs.createMaterial(new THREE.MeshPhongMaterial({ color: 0xffffff }), 1, 0), 0);
+      leg.position.set(0,-1,fac * scene.table.geometry.depth/4);
+      leg.visible = false;
+      scene.add(leg);
+  });
+
   scene.add(scene.table);
 
   new CupFormation({ side: 'near' });
