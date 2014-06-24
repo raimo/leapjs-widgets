@@ -2,7 +2,7 @@
   "use strict";
 
   var cupRadius = 3;
-  var cupPlacementDistance = cupRadius * 1.7;
+  var cupPlacementDistance = cupRadius * 2;
   var cupGeometry = new THREE.CylinderGeometry(cupRadius, 0.8 * cupRadius, cupRadius * 2, 32, true);
   var cupBottomGeometry = new THREE.CylinderGeometry(cupRadius * 0.8, cupRadius * 0.8, cupRadius * 0.4, 32, true);
   var cupTopGeometry = new THREE.TorusGeometry(cupRadius, cupRadius*0.07, 32, 32, Math.PI*2);
@@ -25,7 +25,7 @@
     this.pointPosition = new THREE.Vector3(
       0,
       // is there a better way of getting table top-surface position?
-        scene.table.position.y + scene.table.geometry.height / 2 + cupGeometry.height / 2,
+        scene.table.position.y + scene.table.geometry.parameters.height / 2 + cupGeometry.parameters.height / 2,
         scene.table.geometry.depth/2 - 20
     ).multiply(this.rotation);
     this.cups = [];
@@ -66,8 +66,6 @@
     return cup;
   }
 
-
-  var cupPlacementDistance = 6;
 
   CupFormation.prototype.rightwardCupOffset = function () {
     return new THREE.Vector3(cupPlacementDistance, 0, 0).multiply(this.rotation);

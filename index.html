@@ -1,67 +1,241 @@
 <!DOCTYPE HTML>
 <html>
-  <head>
-    <title>Beer Pong</title>
-  </head>
-  <body>
-    <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
-    <script type="text/javascript" src="bower_components/sass-bootstrap/dist/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="javascripts/lib/three.js"></script>
-    <script type="text/javascript" src="javascripts/lib/physi.js"></script>
-    <script type="text/javascript" src="javascripts/lib/Detector.js"></script>
-    <script type="text/javascript" src="javascripts/lib/TrackballControls.js"></script>
-    <script type="text/javascript" src="javascripts/lib/leap-0.6.0-beta1-custom.js"></script>
-    <script type="text/javascript" src="javascripts/lib/leap-plugins-0.1.4.1-custom.js"></script>
-    <script type="text/javascript" src="javascripts/lib/leap.transform.js"></script>
-    <script type="text/javascript" src="javascripts/lib/leap.rigged-hand-0.1.0-custom.js"></script>
-    <script type="text/javascript" src="javascripts/cup_formation.js"></script>
-    <script type="text/javascript" src="javascripts/scene.js"></script>
-    <script type="text/javascript">
-        (window.controller = new Leap.Controller)
-          .use('transform', {
-            position: function(hand){
-              return new THREE.Vector3(0, 0, 200);
-            }
-          })
-          .use('riggedHand', {
-            parent: window.scene,
-            positionScale: 2.5,
-            scale: 1.5,
-            boneColors: function(){
-              return {
-                hue: 0.1,
-                saturation: 1,
-                lightness: 0.88
-              }
-            }
-          })
-          .connect()
-          .on('frame', function(frame){
-            window.fingerBalls = window.fingerBalls || {};
-            frame.hands.forEach(function(leapHand, i) {
-                fingerBalls[i] = fingerBalls[i] || {};
-                var handMesh = leapHand.data('riggedHand.mesh');
-                leapHand.fingers.forEach(function(finger, j) {
-                    fingerBalls[i][j] = fingerBalls[i][j] || {};
-                    [finger.tipPosition, finger.dipPosition, finger.mcpPosition].forEach(function(tip,k) {
-                      if (!fingerBalls[i][j][k]) {
-                        fingerBalls[i][j][k] = fingerBalls[i][j][k] || new Physijs.SphereMesh(
-                          new THREE.SphereGeometry(0.6, 32, 32),
-                          Physijs.createMaterial(new THREE.MeshPhongMaterial({color: 0x0000ff}), 100, 0),
-                          100
-                        );
-                        fingerBalls[i][j][k].visible = false;
-                        fingerBalls[i][j][k].castShadow = false;
-                        handMesh.scenePosition([tip[0], tip[1], tip[2]], fingerBalls[i][j][k].position);
-                        scene.add(fingerBalls[i][j][k]);
-                      }
-                      var clonepos = new THREE.Vector3();
-                      handMesh.scenePosition([tip[0], tip[1], tip[2]], clonepos);
-                      fingerBalls[i][j][k].setLinearVelocity(clonepos.sub(fingerBalls[i][j][k].position).multiplyScalar(15));
-                    });
-                });
-            });
+<head>
+  <title>Bone Hands - Leap</title>
+  <script src="javascripts/three.r67.js"></script>
+  <script src="javascripts/lib/physi.js"></script>
+  <script src="javascripts/leap-0.6.0.min.js"></script>
+  <script src="javascripts/leap-plugins-0.1.6.min.js"></script>
+  <script src="javascripts/lib/TrackballControls.js"></script>
+  <script src="javascripts/cup_formation.js"></script>
+</head>
+<body>
+
+  <script>
+    var baseBoneRotation = (new THREE.Quaternion).setFromEuler(
+        new THREE.Euler(Math.PI / 2, 0, 0)
+    );
+
+    Leap.loop({background: true}, {
+      hand: function (hand) {
+
+        hand.fingers.forEach(function (finger) {
+
+//          // This is the meat of the example - Positioning `the cylinders on every frame:
+//          finger.data('boneMeshes').forEach(function(mesh, i){
+//            var bone = finger.bones[i];
+//
+//            mesh.position.fromArray(bone.center());
+//
+//            mesh.setRotationFromMatrix(
+//                (new THREE.Matrix4).fromArray( bone.matrix() )
+//            );
+//
+//            mesh.quaternion.multiply(baseBoneRotation);
+//          });
+
+          finger.data('jointMeshes').forEach(function(mesh, i){
+            var bone = finger.bones[i];
+            var jointPosition = new THREE.Vector3().fromArray(bone ? bone.prevJoint : finger.bones[i-1].nextJoint);
+            mesh.setLinearVelocity(jointPosition.sub(mesh.position).multiplyScalar(7));
+            //mesh.position.copy(jointPosition);
+            //mesh.__dirtyPosition = true;
           });
-    </script>
-  </body>
+
+        });
+    }})
+      // these two LeapJS plugins, handHold and handEntry are available from leapjs-plugins, included above.
+      // handHold provides hand.data
+      // handEntry provides handFound/handLost events.
+    .use('handHold')
+    .use('handEntry')
+    .on('handFound', function(hand){
+
+      hand.fingers.forEach(function (finger) {
+
+        var boneMeshes = [];
+        var jointMeshes = [];
+
+        finger.bones.forEach(function(bone) {
+
+          // create joints
+
+          // CylinderGeometry(radiusTop, radiusBottom, height, radiusSegments, heightSegments, openEnded)
+          var boneMesh = new Physijs.CylinderMesh(
+              new THREE.CylinderGeometry(5, 5, bone.length),
+              Physijs.createMaterial(new THREE.MeshPhongMaterial(), 1, 1),
+              1
+          );
+
+          boneMesh.material.color.setHex(0xffffff);
+//          scene.add(boneMesh);
+//          boneMeshes.push(boneMesh);
+        });
+
+        for (var i = 0; i < finger.bones.length + 1; i++) {
+
+          var jointMesh = new Physijs.SphereMesh(
+              new THREE.SphereGeometry(8),
+              Physijs.createMaterial(new THREE.MeshPhongMaterial(), 1, 1),
+              1
+          );
+
+          jointMesh.material.color.setHex(0x0088ce);
+          scene.add(jointMesh);
+          jointMeshes.push(jointMesh);
+
+        }
+
+
+        finger.data('boneMeshes', boneMeshes);
+        finger.data('jointMeshes', jointMeshes);
+
+      });
+
+    })
+    .on('handLost', function(hand){
+
+      hand.fingers.forEach(function (finger) {
+
+        var boneMeshes = finger.data('boneMeshes');
+        var jointMeshes = finger.data('jointMeshes');
+
+        boneMeshes.forEach(function(mesh){
+          scene.remove(mesh);
+        });
+
+        jointMeshes.forEach(function(mesh){
+          scene.remove(mesh);
+        });
+
+        finger.data({
+          boneMeshes: null,
+          boneMeshes: null
+        });
+
+      });
+    })
+//    .use('playback', {
+//      // This is a compressed JSON file of preprecorded frame data
+//      recording: 'recordings/scroll-and-swipe-100fps.json.lz',
+//      // How long, in ms, between repeating the recording.
+//      timeBetweenLoops: 2000,
+//      pauseOnHand: true
+//    })
+    .connect();
+
+
+    // all units in mm
+    var initScene = function () {
+      Physijs.scripts.worker = 'javascripts/lib/physijs_worker.js';
+      window.scene = new Physijs.Scene();
+      window.scene.addEventListener('update', function() {
+        scene.simulate( undefined, 2 );
+      });
+      window.scene.setGravity({x:0,y:-100,z:0});
+      window.renderer = new THREE.WebGLRenderer({
+        alpha: true
+      });
+      window.renderer.shadowMapEnabled = true;
+      window.renderer.shadowMapType = THREE.BasicShadowMap;
+
+
+      window.renderer.setClearColor(0x000000, 0);
+      window.renderer.setSize(window.innerWidth, window.innerHeight);
+
+      window.renderer.domElement.style.position = 'fixed';
+      window.renderer.domElement.style.top = 0;
+      window.renderer.domElement.style.left = 0;
+      window.renderer.domElement.style.width = '100%';
+      window.renderer.domElement.style.height = '100%';
+
+      document.body.appendChild(window.renderer.domElement);
+
+      scene.table = new Physijs.BoxMesh(
+        new THREE.BoxGeometry(100, 18, 146),
+        Physijs.createMaterial(new THREE.MeshPhongMaterial({
+          color: 0x003000
+        }), 1, 0.9),
+        200
+      );
+      scene.table.position.set(0, 150, 0 );
+      scene.table.receiveShadow = true;
+      scene.table.castShadow = true;
+      var middleStripe = new THREE.Mesh( new THREE.BoxGeometry(0.3, scene.table.geometry.parameters.height, scene.table.geometry.parameters.depth), new THREE.MeshPhongMaterial({ color: 0xffffff }));
+      middleStripe.position.set(0,0.01,0);
+      scene.table.add(middleStripe);
+
+      var leftStripe = new THREE.Mesh( new THREE.BoxGeometry(0.3, scene.table.geometry.parameters.height, scene.table.geometry.parameters.depth), new THREE.MeshPhongMaterial({ color: 0xffffff }));
+      leftStripe.position.set(scene.table.geometry.parameters.width/2,0.01,0);
+      scene.table.add(leftStripe);
+
+      var rightStripe = new THREE.Mesh( new THREE.BoxGeometry(0.3, scene.table.geometry.parameters.height, scene.table.geometry.parameters.depth), new THREE.MeshPhongMaterial({ color: 0xffffff }));
+      rightStripe.position.set(-scene.table.geometry.parameters.width/2,0.01,0);
+      scene.table.add(rightStripe);
+
+      var frontStripe = new THREE.Mesh( new THREE.BoxGeometry(scene.table.geometry.parameters.width, scene.table.geometry.parameters.height, 0.3), new THREE.MeshPhongMaterial({ color: 0xffffff }));
+      frontStripe.position.set(0,0.01,scene.table.geometry.parameters.depth/2);
+      scene.table.add(frontStripe);
+
+      var backStripe = new THREE.Mesh( new THREE.BoxGeometry(scene.table.geometry.parameters.width, scene.table.geometry.parameters.height, 0.3), new THREE.MeshPhongMaterial({ color: 0xffffff }));
+      backStripe.position.set(0,0.01,-scene.table.geometry.parameters.depth/2);
+      scene.table.add(backStripe);
+
+      [-1,1].forEach(function(fac) {
+          var leg = new Physijs.BoxMesh(
+                  new THREE.BoxGeometry(scene.table.geometry.parameters.width, 1, 1),
+                  Physijs.createMaterial(new THREE.MeshPhongMaterial({ color: 0xffffff }), 1, 0), 0);
+          leg.position.set(0,scene.table.position.y-(scene.table.geometry.parameters.height/2+1/2),fac * scene.table.geometry.parameters.depth/4);
+          leg.visible = false;
+          scene.add(leg);
+      });
+
+      scene.add(scene.table);
+
+      new CupFormation({ side: 'near' });
+      new CupFormation({ side: 'far' });
+
+      var directionalLight = new THREE.SpotLight(0xffffff, 0.8);
+      //directionalLight.shadowCameraVisible = true;
+      directionalLight.castShadow = true;
+      directionalLight.shadowMapWidth = 6048;
+      directionalLight.shadowMapHeight = 6048;
+      directionalLight.position.set( 0, 500, 0);
+      directionalLight.shadowCameraLeft = -300;
+      directionalLight.shadowCameraRight = 300;
+      directionalLight.shadowCameraTop = 300;
+      directionalLight.shadowCameraBottom = 300;
+      directionalLight.shadowCameraFar = 800;
+      directionalLight.shadowDarkness = 0.5;
+      directionalLight.position.fromArray([0, scene.table.position.y + 600, 200]);
+      scene.add(directionalLight);
+
+      window.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+      window.camera.position.fromArray([0, scene.table.position.y + 200, 200]);
+      window.camera.lookAt(new THREE.Vector3().fromArray([scene.table.position.x, scene.table.position.y, scene.table.position.z]));
+      window.controls = new THREE.TrackballControls( camera );
+      window.controls.target = new THREE.Vector3().fromArray([scene.table.position.x, scene.table.position.y, scene.table.position.z]);
+
+      window.addEventListener('resize', function () {
+        controls.handleResize();
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.render(scene, camera);
+      }, false);
+
+      scene.add(camera);
+    };
+
+    initScene();
+    window.step = function() {
+      controls.update();
+      scene.simulate();
+      renderer.render(scene, camera);
+      requestAnimationFrame(step);
+    }
+    step();
+  </script>
+
+</body>
 </html>
