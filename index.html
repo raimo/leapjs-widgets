@@ -21,25 +21,20 @@
 
         hand.fingers.forEach(function (finger) {
 
-//          // This is the meat of the example - Positioning `the cylinders on every frame:
-//          finger.data('boneMeshes').forEach(function(mesh, i){
-//            var bone = finger.bones[i];
-//
-//            mesh.position.fromArray(bone.center());
-//
-//            mesh.setRotationFromMatrix(
-//                (new THREE.Matrix4).fromArray( bone.matrix() )
-//            );
-//
-//            mesh.quaternion.multiply(baseBoneRotation);
-//          });
+          finger.data('boneMeshes').forEach(function(mesh, i){
+            var bone = finger.bones[i];
+            var bonePosition = new THREE.Vector3().fromArray(bone.center());
+            mesh.setLinearVelocity(bonePosition.sub(mesh.position).multiplyScalar(7));
+            mesh.setRotationFromMatrix(new THREE.Matrix4().fromArray(bone.matrix()));
+            mesh.quaternion.multiply(baseBoneRotation);
+            mesh.__dirtyRotation = true;
+          });
 
           finger.data('jointMeshes').forEach(function(mesh, i){
             var bone = finger.bones[i];
             var jointPosition = new THREE.Vector3().fromArray(bone ? bone.prevJoint : finger.bones[i-1].nextJoint);
             mesh.setLinearVelocity(jointPosition.sub(mesh.position).multiplyScalar(7));
-            //mesh.position.copy(jointPosition);
-            //mesh.__dirtyPosition = true;
+            mesh.setAngularVelocity(new THREE.Vector3());
           });
 
         });
@@ -50,6 +45,7 @@
     .use('handHold')
     .use('handEntry')
     .on('handFound', function(hand){
+      var ballRadius = 6;
 
       hand.fingers.forEach(function (finger) {
 
@@ -57,25 +53,20 @@
         var jointMeshes = [];
 
         finger.bones.forEach(function(bone) {
-
-          // create joints
-
-          // CylinderGeometry(radiusTop, radiusBottom, height, radiusSegments, heightSegments, openEnded)
           var boneMesh = new Physijs.CylinderMesh(
-              new THREE.CylinderGeometry(5, 5, bone.length),
+              new THREE.CylinderGeometry(5, 5, bone.length - ballRadius*2),
               Physijs.createMaterial(new THREE.MeshPhongMaterial(), 1, 1),
               1
           );
 
           boneMesh.material.color.setHex(0xffffff);
-//          scene.add(boneMesh);
-//          boneMeshes.push(boneMesh);
+          scene.add(boneMesh);
+          boneMeshes.push(boneMesh);
         });
 
         for (var i = 0; i < finger.bones.length + 1; i++) {
-
           var jointMesh = new Physijs.SphereMesh(
-              new THREE.SphereGeometry(8),
+              new THREE.SphereGeometry(ballRadius, 16),
               Physijs.createMaterial(new THREE.MeshPhongMaterial(), 1, 1),
               1
           );
@@ -83,7 +74,6 @@
           jointMesh.material.color.setHex(0x0088ce);
           scene.add(jointMesh);
           jointMeshes.push(jointMesh);
-
         }
 
 
