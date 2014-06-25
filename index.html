@@ -7,7 +7,6 @@
   <script src="javascripts/leap-0.6.1.min.js"></script>
   <script src="javascripts/leap-plugins-0.1.6.min.js"></script>
   <script src="javascripts/lib/TrackballControls.js"></script>
-  <script src="javascripts/cup_formation.js"></script>
 </head>
 <body>
 
@@ -154,7 +153,7 @@
         }), 1, 0.9),
         200
       );
-      scene.table.position.set(0, 150, 0 );
+      scene.table.position.set(0, 150, -200 );
       scene.table.receiveShadow = true;
       scene.table.castShadow = true;
       var middleStripe = new THREE.Mesh( new THREE.BoxGeometry(0.3, scene.table.geometry.parameters.height, scene.table.geometry.parameters.depth), new THREE.MeshPhongMaterial({ color: 0xffffff }));
@@ -181,15 +180,16 @@
           var leg = new Physijs.BoxMesh(
                   new THREE.BoxGeometry(scene.table.geometry.parameters.width, 1, 1),
                   Physijs.createMaterial(new THREE.MeshPhongMaterial({ color: 0xffffff }), 1, 0), 0);
-          leg.position.set(0,scene.table.position.y-(scene.table.geometry.parameters.height/2+1/2),fac * scene.table.geometry.parameters.depth/4);
+          leg.position.set(
+            scene.table.position.x,
+            scene.table.position.y - (scene.table.geometry.parameters.height/2+1/2),
+            scene.table.position.z + fac * scene.table.geometry.parameters.depth/4
+          );
           leg.visible = false;
           scene.add(leg);
       });
 
       scene.add(scene.table);
-
-      new CupFormation({ side: 'near' });
-      new CupFormation({ side: 'far' });
 
       var directionalLight = new THREE.SpotLight(0xffffff, 0.8);
       //directionalLight.shadowCameraVisible = true;
