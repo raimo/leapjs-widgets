@@ -7,6 +7,7 @@
   <script src="javascripts/leap-0.6.1.min.js"></script>
   <script src="javascripts/leap-plugins-0.1.6.min.js"></script>
   <script src="javascripts/lib/TrackballControls.js"></script>
+  <script src="javascripts/leap.widgets.js"></script>
 </head>
 <body>
 
@@ -14,9 +15,6 @@
     var baseBoneRotation = (new THREE.Quaternion).setFromEuler(
         new THREE.Euler(Math.PI / 2, 0, 0)
     );
-    var BUTTON_COLOR = 0xf000ff;
-    var BUTTON_COLOR_ACTIVE = 0xff0000;
-
     Leap.loop({background: true}, {
       hand: function (hand) {
 
@@ -25,7 +23,7 @@
           finger.data('boneMeshes').forEach(function(mesh, i){
             var bone = finger.bones[i];
             var bonePosition = new THREE.Vector3().fromArray(bone.center());
-            bonePosition.y -= 150;
+            bonePosition.y -= 130;
             mesh.setLinearVelocity(bonePosition.sub(mesh.position).multiplyScalar(16));
             mesh.setRotationFromMatrix(new THREE.Matrix4().fromArray(bone.matrix()));
             mesh.quaternion.multiply(baseBoneRotation);
@@ -35,7 +33,7 @@
           finger.data('jointMeshes').forEach(function(mesh, i){
             var bone = finger.bones[i];
             var jointPosition = new THREE.Vector3().fromArray(bone ? bone.prevJoint : finger.bones[i-1].nextJoint);
-            jointPosition.y -= 150;
+            jointPosition.y -= 130;
             mesh.setLinearVelocity(jointPosition.sub(mesh.position).multiplyScalar(20));
             mesh.setAngularVelocity(new THREE.Vector3());
           });
@@ -125,10 +123,8 @@
     .connect();
 
 
-    function createLabel(text, x, y, z, size, color, backGroundColor, backgroundMargin) {
-      if(!backgroundMargin)
-        backgroundMargin = 50;
-
+    function createLabel(text, position, size, color) {
+      var hexpadding = "#000000"
       var canvas = document.createElement("canvas");
 
       var context = canvas.getContext("2d");
@@ -136,65 +132,28 @@
 
       var textWidth = context.measureText(text).width;
 
-      canvas.width = textWidth + backgroundMargin;
-      canvas.height = size + backgroundMargin;
+      canvas.width = textWidth;
+      canvas.height = size + 2;
       context = canvas.getContext("2d");
       context.font = size + "pt Arial";
-
-      if(backGroundColor) {
-        context.fillStyle = backGroundColor;
-        context.fillRect(canvas.width / 2 - textWidth / 2 - backgroundMargin / 2, canvas.height / 2 - size / 2 - +backgroundMargin / 2, textWidth + backgroundMargin, size + backgroundMargin);
-      }
-
       context.textAlign = "center";
       context.textBaseline = "middle";
-      context.fillStyle = color;
+      context.fillStyle = hexpadding.substring(0, hexpadding.length - color.toString(16).length) + color.toString(16);
       context.fillText(text, canvas.width / 2, canvas.height / 2);
-
-      // context.strokeStyle = "black";
-      // context.strokeRect(0, 0, canvas.width, canvas.height);
 
       var texture = new THREE.Texture(canvas);
       texture.needsUpdate = true;
 
       var material = new THREE.MeshBasicMaterial({
-        map : texture
+        map : texture,
+        transparent: true
       });
 
       var mesh = new THREE.Mesh(new THREE.PlaneGeometry(canvas.width, canvas.height), material);
-      // mesh.overdraw = true;
       mesh.doubleSided = true;
-      mesh.position.x = x - canvas.width;
-      mesh.position.y = y - canvas.height;
-      mesh.position.z = z;
+      mesh.position.copy(position);
 
       return mesh;
-    }
-
-    function createButton(position, dimensions) {
-      var button = new Physijs.BoxMesh(
-        new THREE.BoxGeometry(dimensions.x, dimensions.y, dimensions.z),
-        Physijs.createMaterial(new THREE.MeshPhongMaterial({
-          color: BUTTON_COLOR
-        }), 1, 0.9),
-        100
-      );
-      button.originalposition = position;
-      button.position.copy(button.originalposition);
-      button.receiveShadow = true;
-      button.castShadow = true;
-      scene.add(button);
-
-      button.slider = new Physijs.SliderConstraint(
-        button,
-        null,
-        new THREE.Vector3(0, 0, -200),
-        new THREE.Vector3(0, Math.sqrt(2), Math.sqrt(2))
-      );
-      scene.addConstraint(button.slider);
-      button.slider.setLimits(-15, 0, 0, 0);
-//      button.slider.setRestitution(0, 0);
-      return button;
     }
 
     var initScene = function () {
@@ -222,12 +181,15 @@
 
       document.body.appendChild(window.renderer.domElement);
 
+      window.widgets = new LeapWidgets(window.scene);
 
-      scene.table = createButton(new THREE.Vector3(0, 0, -150), new THREE.Vector3(100, 100, 30));
+      widgets.createButton("Option A", new THREE.Vector3(0, 80, -150), new THREE.Vector3(100, 70, 30));
+      middlebutton = widgets.createButton("Option C", new THREE.Vector3(0, 0, -150), new THREE.Vector3(100, 70, 30));
+      widgets.createButton("Option E", new THREE.Vector3(0, -80, -150), new THREE.Vector3(100, 70, 30));
 
       [
-       [0, scene.table.position.y + 300, 0],
-       [0, scene.table.position.y + 100, scene.table.position.z + 300]
+       [0, middlebutton.position.y + 300, 0],
+       [0, middlebutton.position.y + 100, middlebutton.position.z + 300]
       ].forEach(function(pos) {
         var directionalLight = new THREE.SpotLight(0xffffff, 1);
 //        directionalLight.shadowCameraVisible = true;
@@ -246,9 +208,9 @@
 
       window.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
       window.camera.position.fromArray([0, 0, 200]);
-      window.camera.lookAt(new THREE.Vector3(scene.table.position.x, scene.table.position.y, scene.table.position.z));
+      window.camera.lookAt(new THREE.Vector3(middlebutton.position.x, middlebutton.position.y, middlebutton.position.z));
       window.controls = new THREE.TrackballControls( camera );
-      window.controls.target = new THREE.Vector3().fromArray([scene.table.position.x, scene.table.position.y, scene.table.position.z]);
+      window.controls.target = new THREE.Vector3().fromArray([middlebutton.position.x, middlebutton.position.y, middlebutton.position.z]);
 
       window.addEventListener('resize', function () {
         controls.handleResize();
@@ -264,9 +226,7 @@
     initScene();
     window.step = function() {
       controls.update();
-
-      scene.table.setLinearVelocity(new THREE.Vector3().copy(scene.table.originalposition).sub(scene.table.position).multiplyScalar(16));
-      scene.table.material.color.setHex(scene.table.position.z+2 < scene.table.originalposition.z ? BUTTON_COLOR_ACTIVE : BUTTON_COLOR);
+      widgets.update();
       scene.simulate();
       renderer.render(scene, camera);
       requestAnimationFrame(step);
