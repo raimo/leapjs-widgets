@@ -2,16 +2,15 @@
 <html>
 <head>
   <title>Bone Hands - Leap</title>
-  <script src="javascripts/three.r67.js"></script>
-  <script src="javascripts/lib/physi.js"></script>
-  <script src="javascripts/leap-0.6.1.min.js"></script>
-  <script src="javascripts/leap-plugins-0.1.6.min.js"></script>
-  <script src="javascripts/lib/TrackballControls.js"></script>
-  <script src="javascripts/leap.widgets.js"></script>
+  <script type="text/javascript" src="javascripts/three.r67.js"></script>
+  <script type="text/javascript"  src="javascripts/lib/physi.js"></script>
+  <script type="text/javascript" src="javascripts/leap-0.6.1.min.js"></script>
+  <script type="text/javascript" src="javascripts/leap-plugins-0.1.6.min.js"></script>
+  <script type="text/javascript" src="javascripts/lib/TrackballControls.js"></script>
+  <script type="text/javascript" src="javascripts/leap.widgets.js"></script>
 </head>
 <body>
-
-  <script>
+  <script type="text/javascript">
     var baseBoneRotation = (new THREE.Quaternion).setFromEuler(
         new THREE.Euler(Math.PI / 2, 0, 0)
     );
@@ -69,7 +68,7 @@
 
         for (var i = 0; i < finger.bones.length + 1; i++) {
           var jointMesh = new Physijs.SphereMesh(
-              new THREE.SphereGeometry((finger.bones[i] || finger.bones[i-1]).width/2, 16),
+              new THREE.SphereGeometry(((finger.bones[i] || finger.bones[i-1]).width || 5)/2, 16),
               Physijs.createMaterial(new THREE.MeshPhongMaterial(), 0, 0),
               100
           );
@@ -123,39 +122,6 @@
     .connect();
 
 
-    function createLabel(text, position, size, color) {
-      var hexpadding = "#000000"
-      var canvas = document.createElement("canvas");
-
-      var context = canvas.getContext("2d");
-      context.font = size + "pt Arial";
-
-      var textWidth = context.measureText(text).width;
-
-      canvas.width = textWidth;
-      canvas.height = size + 2;
-      context = canvas.getContext("2d");
-      context.font = size + "pt Arial";
-      context.textAlign = "center";
-      context.textBaseline = "middle";
-      context.fillStyle = hexpadding.substring(0, hexpadding.length - color.toString(16).length) + color.toString(16);
-      context.fillText(text, canvas.width / 2, canvas.height / 2);
-
-      var texture = new THREE.Texture(canvas);
-      texture.needsUpdate = true;
-
-      var material = new THREE.MeshBasicMaterial({
-        map : texture,
-        transparent: true
-      });
-
-      var mesh = new THREE.Mesh(new THREE.PlaneGeometry(canvas.width, canvas.height), material);
-      mesh.doubleSided = true;
-      mesh.position.copy(position);
-
-      return mesh;
-    }
-
     var initScene = function () {
       Physijs.scripts.worker = 'javascripts/lib/physijs_worker.js';
       window.scene = new Physijs.Scene();
@@ -183,9 +149,11 @@
 
       window.widgets = new LeapWidgets(window.scene);
 
-      widgets.createButton("Option A", new THREE.Vector3(0, 80, -150), new THREE.Vector3(100, 70, 30));
-      middlebutton = widgets.createButton("Option C", new THREE.Vector3(0, 0, -150), new THREE.Vector3(100, 70, 30));
-      widgets.createButton("Option E", new THREE.Vector3(0, -80, -150), new THREE.Vector3(100, 70, 30));
+      widgets.createLabel("Buttons", new THREE.Vector3(0, 140, -110), 16, 0x000000);
+
+      widgets.createButton("Option A", new THREE.Vector3(0, 80, -110), new THREE.Vector3(100, 70, 30));
+      var middlebutton = widgets.createButton("Option C", new THREE.Vector3(0, 0, -110), new THREE.Vector3(100, 70, 30));
+      widgets.createButton("Option E", new THREE.Vector3(0, -80, -110), new THREE.Vector3(100, 70, 30));
 
       [
        [0, middlebutton.position.y + 300, 0],
