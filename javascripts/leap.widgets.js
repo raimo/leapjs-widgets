@@ -49,8 +49,6 @@
     stick.position.copy(stick.originalposition);
     stick.receiveShadow = true;
     stick.castShadow = true;
-    this.scene.add(stick);
-
     this.createLabel(text, new THREE.Vector3(0, 0, radius), 14, 0xffffff);
 
     stick.knob = new Physijs.SphereMesh(
@@ -62,6 +60,7 @@
     stick.knob.castShadow = true;
     stick.add(stick.knob);
 
+    this.scene.add(stick);
 
     var point = new Physijs.PointConstraint(
       stick,
