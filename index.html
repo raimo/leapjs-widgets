@@ -151,9 +151,11 @@
 
       widgets.createLabel("Buttons", new THREE.Vector3(0, 140, -110), 16, 0x000000);
 
-      widgets.createButton("Option A", new THREE.Vector3(0, 80, -110), new THREE.Vector3(100, 70, 30));
-      var middlebutton = widgets.createButton("Option C", new THREE.Vector3(0, 0, -110), new THREE.Vector3(100, 70, 30));
-      widgets.createButton("Option E", new THREE.Vector3(0, -80, -110), new THREE.Vector3(100, 70, 30));
+      widgets.createButton("Option A", new THREE.Vector3(-80, 80, -110), new THREE.Vector3(100, 70, 30));
+//      widgets.createButton("Option C", new THREE.Vector3(0, 0, -110), new THREE.Vector3(100, 70, 30));
+//      widgets.createButton("Option E", new THREE.Vector3(0, -80, -110), new THREE.Vector3(100, 70, 30));
+
+      var middlebutton = widgets.createSwitch("Option E", new THREE.Vector3(80, 80, -70), 10, 100);
 
       [
        [0, middlebutton.position.y + 300, 0],
@@ -176,9 +178,9 @@
 
       window.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
       window.camera.position.fromArray([0, 0, 200]);
-      window.camera.lookAt(new THREE.Vector3(middlebutton.position.x, middlebutton.position.y, middlebutton.position.z));
+      window.camera.lookAt(new THREE.Vector3(0, middlebutton.position.y, middlebutton.position.z));
       window.controls = new THREE.TrackballControls( camera );
-      window.controls.target = new THREE.Vector3().fromArray([middlebutton.position.x, middlebutton.position.y, middlebutton.position.z]);
+      window.controls.target = new THREE.Vector3().fromArray([0, middlebutton.position.y, middlebutton.position.z]);
 
       window.addEventListener('resize', function () {
         controls.handleResize();
