@@ -53,14 +53,14 @@
 
     this.createLabel(text, new THREE.Vector3(0, 0, radius), 14, 0xffffff);
 
-    var knob = new Physijs.SphereMesh(
+    stick.knob = new Physijs.SphereMesh(
         new THREE.SphereGeometry(32, 27),
         Physijs.createMaterial(new THREE.MeshPhongMaterial({color: 0xcc1122}), 0, 0),
         100
     );
-    knob.position.y = height/2;
-    knob.castShadow = true;
-    stick.add(knob);
+    stick.knob.position.y = height/2;
+    stick.knob.castShadow = true;
+    stick.add(stick.knob);
 
 
     var point = new Physijs.PointConstraint(
@@ -119,6 +119,7 @@
     this.switches.forEach(function(stick) {
       stick.setLinearVelocity(new THREE.Vector3(0,1000,0));
       stick.setAngularVelocity(new THREE.Vector3(0,0,0));
+      stick.knob.material.color.setHex(Math.pow(stick.position.z-stick.originalposition.z, 2) + Math.pow(stick.position.x-stick.originalposition.x, 2) > 2 ? BUTTON_COLOR_ACTIVE : BUTTON_COLOR);
     });
   };
 })();
