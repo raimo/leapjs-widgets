@@ -14,6 +14,7 @@
     var baseBoneRotation = (new THREE.Quaternion).setFromEuler(
         new THREE.Euler(Math.PI / 2, 0, 0)
     );
+    var boneWidthDefault = 10; // TODO not returned by recorder yet.
     Leap.loop({background: true}, {
       hand: function (hand) {
 
@@ -51,8 +52,9 @@
         var jointMeshes = [];
 
         finger.bones.forEach(function(bone, boneIndex) {
+          var boneWidth = bone.width || boneWidthDefault;
           var boneMesh = new Physijs.CylinderMesh(
-              new THREE.CylinderGeometry(bone.width/2, bone.width/2, bone.length - bone.width),
+              new THREE.CylinderGeometry(boneWidth/2, boneWidth/2, bone.length - boneWidth),
               Physijs.createMaterial(new THREE.MeshPhongMaterial(), 0, 0),
               100
           );
@@ -68,7 +70,7 @@
 
         for (var i = 0; i < finger.bones.length + 1; i++) {
           var jointMesh = new Physijs.SphereMesh(
-              new THREE.SphereGeometry(((finger.bones[i] || finger.bones[i-1]).width || 10)/2, 16),
+              new THREE.SphereGeometry(((finger.bones[i] || finger.bones[i-1]).width || boneWidthDefault)/2, 16),
               Physijs.createMaterial(new THREE.MeshPhongMaterial(), 0, 0),
               100
           );
