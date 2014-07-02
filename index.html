@@ -15,7 +15,13 @@
         new THREE.Euler(Math.PI / 2, 0, 0)
     );
     var boneWidthDefault = 10; // TODO not returned by recorder yet.
-    Leap.loop({background: true}, {
+    Leap.loop({
+      frame: function() {
+        controls.update();
+        widgets.update();
+        scene.simulate();
+        renderer.render(scene, camera);
+      },
       hand: function (hand) {
 
         hand.fingers.forEach(function (finger) {
@@ -24,6 +30,7 @@
             var bone = finger.bones[i];
             var bonePosition = new THREE.Vector3().fromArray(bone.center());
             bonePosition.y -= 130;
+            bonePosition.z += 80;
             mesh.setLinearVelocity(bonePosition.sub(mesh.position).multiplyScalar(16));
             mesh.setRotationFromMatrix(new THREE.Matrix4().fromArray(bone.matrix()));
             mesh.quaternion.multiply(baseBoneRotation);
@@ -34,12 +41,14 @@
             var bone = finger.bones[i];
             var jointPosition = new THREE.Vector3().fromArray(bone ? bone.prevJoint : finger.bones[i-1].nextJoint);
             jointPosition.y -= 130;
+            jointPosition.z += 80;
             mesh.setLinearVelocity(jointPosition.sub(mesh.position).multiplyScalar(20));
             mesh.setAngularVelocity(new THREE.Vector3());
           });
 
         });
-    }})
+      }
+    })
       // these two LeapJS plugins, handHold and handEntry are available from leapjs-plugins, included above.
       // handHold provides hand.data
       // handEntry provides handFound/handLost events.
@@ -130,7 +139,8 @@
       window.scene.addEventListener('update', function() {
         scene.simulate( undefined, 2 );
       });
-      window.scene.setGravity({x:0,y:-100,z:0});
+//      window.scene.setGravity({x:0,y:-100,z:0});
+      window.scene.setGravity({x:0,y:0,z:0});
       window.renderer = new THREE.WebGLRenderer({
         alpha: true
       });
@@ -152,31 +162,33 @@
       window.widgets = new LeapWidgets(window.scene);
 
       widgets.createLabel("Dashboard", new THREE.Vector3(0, 140, -110), 16, 0x000000);
-
+      var wall = widgets.createWall(new THREE.Vector3(0, 0, -200), new THREE.Vector3(500, 800, 100));
       var middlebutton = widgets.createButton("Button", new THREE.Vector3(-100, 80, -110), new THREE.Vector3(100, 70, 30));
 
-      widgets.createSwitch("Knob", new THREE.Vector3(100, 80, -70), 10, 100);
+      widgets.createSlider("Slider", new THREE.Vector3(10, 80, -110), new THREE.Vector3(100, 30, 90));
+      widgets.createSwitch("Knob", new THREE.Vector3(100, 80, -110), 10, 100);
 
       [
-       [0, middlebutton.position.y + 300, 0],
-       [0, middlebutton.position.y + 100, middlebutton.position.z + 300]
+//       [0, middlebutton.position.y + 300, 0],
+       [wall.position.x, wall.position.y, wall.position.z + 1000]
       ].forEach(function(pos) {
-        var directionalLight = new THREE.SpotLight(0xffffff, 1);
-//        directionalLight.shadowCameraVisible = true;
-        directionalLight.castShadow = true;
-        directionalLight.shadowMapWidth = 6048;
-        directionalLight.shadowMapHeight = 6048;
-        directionalLight.shadowCameraLeft = -300;
-        directionalLight.shadowCameraRight = 300;
-        directionalLight.shadowCameraTop = 300;
-        directionalLight.shadowCameraBottom = 300;
-        directionalLight.shadowCameraFar = 800;
-        directionalLight.shadowDarkness = 0.5;
-        directionalLight.position.fromArray(pos);
-        scene.add(directionalLight);
+        var spotLight = new THREE.SpotLight(0xffffff, 1);
+        spotLight.shadowCameraVisible = true;
+        spotLight.castShadow = true;
+        spotLight.shadowMapWidth = 6048;
+        spotLight.shadowMapHeight = 6048;
+//        spotLight.shadowCameraLeft = 0;//-wall.geometry.parameters.width/2;
+//        spotLight.shadowCameraRight = wall.geometry.parameters.width/2;
+//        spotLight.shadowCameraTop = wall.geometry.parameters.height/2;
+//        spotLight.shadowCameraBottom = -wall.geometry.parameters.height/2;
+        spotLight.shadowCameraFar = 1000;
+        spotLight.shadowDarkness = 0.5;
+        spotLight.position.fromArray(pos);
+        spotLight.target.position.copy(wall.position);
+        scene.add(spotLight);
       });
 
-      window.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+      window.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
       window.camera.position.fromArray([0, 0, 200]);
       window.camera.lookAt(new THREE.Vector3(0, middlebutton.position.y, middlebutton.position.z));
       window.controls = new THREE.TrackballControls( camera );
@@ -194,14 +206,6 @@
     };
 
     initScene();
-    window.step = function() {
-      controls.update();
-      widgets.update();
-      scene.simulate();
-      renderer.render(scene, camera);
-      requestAnimationFrame(step);
-    }
-    step();
   </script>
 
 </body>
