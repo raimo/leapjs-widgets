@@ -1,0 +1,202 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Bone Hands - Leap</title>
+  <script type="text/javascript" src="../javascripts/three.r67.js"></script>
+  <script type="text/javascript" src="../javascripts/lib/physi.js"></script>
+  <script type="text/javascript" src="../javascripts/leap-0.6.1.min.js"></script>
+  <script type="text/javascript" src="../javascripts/leap-plugins-0.1.6.min.js"></script>
+  <script type="text/javascript" src="../javascripts/leap.widgets.js"></script>
+</head>
+<body>
+  <script type="text/javascript">
+    var baseBoneRotation = (new THREE.Quaternion).setFromEuler(
+        new THREE.Euler(Math.PI / 2, 0, 0)
+    );
+    var boneWidthDefault = 10; // TODO not returned by recorder yet.
+    Leap.loop({
+      frame: function() {
+        widgets.update();
+        scene.simulate();
+        renderer.render(scene, camera);
+      },
+      hand: function (hand) {
+
+        hand.fingers.forEach(function (finger) {
+
+          finger.data('boneMeshes').forEach(function(mesh, i){
+            var bone = finger.bones[i];
+            var bonePosition = new THREE.Vector3().fromArray(bone.center());
+            bonePosition.y -= 130;
+            bonePosition.z += 80;
+            mesh.setLinearVelocity(bonePosition.sub(mesh.position).multiplyScalar(16));
+            mesh.setRotationFromMatrix(new THREE.Matrix4().fromArray(bone.matrix()));
+            mesh.quaternion.multiply(baseBoneRotation);
+            mesh.__dirtyRotation = true;
+          });
+
+          finger.data('jointMeshes').forEach(function(mesh, i){
+            var bone = finger.bones[i];
+            var jointPosition = new THREE.Vector3().fromArray(bone ? bone.prevJoint : finger.bones[i-1].nextJoint);
+            jointPosition.y -= 130;
+            jointPosition.z += 80;
+            mesh.setLinearVelocity(jointPosition.sub(mesh.position).multiplyScalar(20));
+            mesh.setAngularVelocity(new THREE.Vector3());
+          });
+
+        });
+      }
+    })
+      // these two LeapJS plugins, handHold and handEntry are available from leapjs-plugins, included above.
+      // handHold provides hand.data
+      // handEntry provides handFound/handLost events.
+    .use('handHold')
+    .use('handEntry')
+    .on('handFound', function(hand){
+      hand.fingers.forEach(function (finger, fingerIndex) {
+
+        var boneMeshes = [];
+        var jointMeshes = [];
+
+        finger.bones.forEach(function(bone, boneIndex) {
+          var boneWidth = bone.width || boneWidthDefault;
+          var boneMesh = new Physijs.CylinderMesh(
+              new THREE.CylinderGeometry(boneWidth/2, boneWidth/2, bone.length - boneWidth),
+              Physijs.createMaterial(new THREE.MeshPhongMaterial(), 0, 0),
+              100
+          );
+          // TODO: why does the thumb have this extra bone? Removing it
+          if (boneIndex === 0 && fingerIndex === 0) {
+            boneMesh.visible = false;
+            boneMesh.mass = 0;
+          }
+          boneMesh.castShadow = true;
+          scene.add(boneMesh);
+          boneMeshes.push(boneMesh);
+        });
+
+        for (var i = 0; i < finger.bones.length + 1; i++) {
+          var jointMesh = new Physijs.SphereMesh(
+              new THREE.SphereGeometry(((finger.bones[i] || finger.bones[i-1]).width || boneWidthDefault)/2, 16),
+              Physijs.createMaterial(new THREE.MeshPhongMaterial(), 0, 0),
+              100
+          );
+          jointMesh.castShadow = true;
+          if (i === 0 && fingerIndex === 0) {
+            jointMesh.visible = false;
+            jointMesh.mass = 0;
+          }
+
+          jointMesh.material.color.setHex(0x0088ce);
+          scene.add(jointMesh);
+          jointMeshes.push(jointMesh);
+        }
+
+
+        finger.data('boneMeshes', boneMeshes);
+        finger.data('jointMeshes', jointMeshes);
+
+      });
+
+    })
+    .on('handLost', function(hand){
+
+      hand.fingers.forEach(function (finger) {
+
+        var boneMeshes = finger.data('boneMeshes');
+        var jointMeshes = finger.data('jointMeshes');
+
+        boneMeshes.forEach(function(mesh){
+          scene.remove(mesh);
+        });
+
+        jointMeshes.forEach(function(mesh){
+          scene.remove(mesh);
+        });
+
+        finger.data({
+          boneMeshes: null,
+          boneMeshes: null
+        });
+
+      });
+    })
+    .use('playback', {
+      // This is a compressed JSON file of preprecorded frame data
+      recording: '../recordings/leap-playback-recording-110fps.json.lz',
+      // How long, in ms, between repeating the recording.
+      timeBetweenLoops: 2000,
+      pauseOnHand: true
+    })
+    .connect();
+
+
+    var initScene = function () {
+      Physijs.scripts.worker = '../javascripts/lib/physijs_worker.js';
+      window.scene = new Physijs.Scene();
+      window.scene.addEventListener('update', function() {
+        scene.simulate( undefined, 2 );
+      });
+      window.scene.setGravity({x:0,y:0,z:0});
+      window.renderer = new THREE.WebGLRenderer({
+        alpha: true
+      });
+      window.renderer.shadowMapEnabled = true;
+      window.renderer.shadowMapType = THREE.BasicShadowMap;
+
+
+      window.renderer.setClearColor(0x000000, 0);
+      window.renderer.setSize(window.innerWidth, window.innerHeight);
+
+      window.renderer.domElement.style.position = 'fixed';
+      window.renderer.domElement.style.top = 0;
+      window.renderer.domElement.style.left = 0;
+      window.renderer.domElement.style.width = '100%';
+      window.renderer.domElement.style.height = '100%';
+
+      document.body.appendChild(window.renderer.domElement);
+
+      window.widgets = new LeapWidgets(window.scene);
+
+      widgets.createLabel("LeapJS Widgets - Buttons", new THREE.Vector3(0, 120, -110), 16, 0x000000);
+      var counterLabel = widgets.createLabel("0", new THREE.Vector3(0, 0, -110), 16, 0x000000);
+      var wall = widgets.createWall(new THREE.Vector3(0, 0, -200), new THREE.Vector3(500, 300, 100));
+      var decreaseButton = widgets.createButton("Decrease", new THREE.Vector3(-100, 0, -110), new THREE.Vector3(100, 70, 30));
+      var increaseButton = widgets.createButton("Increase", new THREE.Vector3(100, 0, -110), new THREE.Vector3(100, 70, 30));
+      decreaseButton.addEventListener('press', function(evt) {
+        counterLabel.setText(parseInt(counterLabel.getText())-1);
+      });
+      increaseButton.addEventListener('press', function(evt) {
+        counterLabel.setText(parseInt(counterLabel.getText())+1);
+      });
+
+      var spotLight = new THREE.SpotLight(0xffffff, 1);
+      spotLight.shadowCameraVisible = true;
+      spotLight.castShadow = true;
+      spotLight.shadowMapWidth = 6048;
+      spotLight.shadowMapHeight = 6048;
+      spotLight.shadowCameraFar = 1000;
+      spotLight.shadowDarkness = 0.5;
+      spotLight.position.fromArray([wall.position.x, wall.position.y, wall.position.z + 1000]);
+      spotLight.target.position.copy(wall.position);
+      scene.add(spotLight);
+
+      window.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
+      window.camera.position.fromArray([0, 0, 300]);
+      window.camera.lookAt(new THREE.Vector3(0, decreaseButton.position.y, decreaseButton.position.z));
+
+      window.addEventListener('resize', function () {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.render(scene, camera);
+      }, false);
+
+      scene.add(camera);
+    };
+
+    initScene();
+  </script>
+
+</body>
+</html>

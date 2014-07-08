@@ -1,6 +1,6 @@
 (function() {
   var BUTTON_COLOR = 0x0088ce;
-  var BUTTON_COLOR_ACTIVE = 0x81d41d;
+  var BUTTON_COLOR_PRESSED = 0x81d41d;
 
   var KNOB_COLOR = 0xff2222;
   var KNOB_COLOR_ACTIVE = 0x81d41d;
@@ -131,35 +131,48 @@
   LeapWidgets.prototype.createLabel = function(text, position, size, color, addTo) {
     var hexpadding = "#000000";
     var canvas = document.createElement("canvas");
+    var widgets = this;
+    var currentLabelMesh = null;
+    var currentText = null;
 
-    var context = canvas.getContext("2d");
-    context.font = size + "pt Helvetica";
+    var label = {
+        getText: function() {
+            return currentText;
+        },
+        setText: function(text) {
+            if (currentLabelMesh) {
+                (addTo || widgets.scene).remove(currentLabelMesh);
+            }
+            currentText = text;
+            var context = canvas.getContext("2d");
+            context.font = size + "pt Helvetica";
 
-    var textWidth = context.measureText(text).width;
+            canvas.width = context.measureText(text).width;
+            canvas.height = size + 8;
+            context.font = size + "pt Arial";
+            context.textAlign = "center";
+            context.textBaseline = "middle";
+            context.fillStyle = hexpadding.substring(0, hexpadding.length - color.toString(16).length) + color.toString(16);
+            context.fillText(text, canvas.width / 2, canvas.height / 2);
 
-    canvas.width = textWidth;
-    canvas.height = size + 2;
-    context = canvas.getContext("2d");
-    context.font = size + "pt Arial";
-    context.textAlign = "center";
-    context.textBaseline = "middle";
-    context.fillStyle = hexpadding.substring(0, hexpadding.length - color.toString(16).length) + color.toString(16);
-    context.fillText(text, canvas.width / 2, canvas.height / 2);
+            var texture = new THREE.Texture(canvas);
+            texture.needsUpdate = true;
 
-    var texture = new THREE.Texture(canvas);
-    texture.needsUpdate = true;
+            var material = new THREE.MeshBasicMaterial({
+              map : texture,
+              transparent: true
+            });
 
-    var material = new THREE.MeshBasicMaterial({
-      map : texture,
-      transparent: true
-    });
+            var mesh = new THREE.Mesh(new THREE.PlaneGeometry(canvas.width, canvas.height), material);
+            mesh.doubleSided = true;
+            mesh.position.copy(position);
 
-    var mesh = new THREE.Mesh(new THREE.PlaneGeometry(canvas.width, canvas.height), material);
-    mesh.doubleSided = true;
-    mesh.position.copy(position);
-
-    (addTo || this.scene).add(mesh);
-    return mesh;
+            (addTo || widgets.scene).add(mesh);
+            currentLabelMesh = mesh;
+        }
+    };
+    label.setText(text);
+    return label;
   }
 
 
@@ -167,7 +180,15 @@
   LeapWidgets.prototype.update = function() {
     this.buttons.forEach(function(button) {
       button.setLinearVelocity(new THREE.Vector3().copy(button.originalposition).sub(button.position).multiplyScalar(16));
-      button.material.color.setHex(button.position.z+2 < button.originalposition.z ? BUTTON_COLOR_ACTIVE : BUTTON_COLOR);
+      var pressed = button.position.z+5 < button.originalposition.z;
+      button.material.color.setHex(pressed ? BUTTON_COLOR_PRESSED : BUTTON_COLOR);
+      if (!button.lastPressed && pressed) {
+          button.dispatchEvent('press', button);
+      }
+      if (button.lastPressed && !pressed) {
+          button.dispatchEvent('pressed', button);
+      }
+      button.lastPressed = pressed;
     });
     this.switches.forEach(function(stick) {
       stick.setLinearVelocity(new THREE.Vector3(0,1000,0));

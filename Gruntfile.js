@@ -31,7 +31,7 @@ module.exports = function (grunt) {
         }
       },
       html: {
-        files: ['*.html'],
+        files: ['*.html', 'examples/*.html'],
         tasks: [],
         options: {
           spawn: false,
