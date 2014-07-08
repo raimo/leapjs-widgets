@@ -77,11 +77,11 @@
       slider,
       null,
       new THREE.Vector3().copy(slider.originalposition),
-      new THREE.Vector3(0, 0, -1)
+      new THREE.Vector3(-Math.sqrt(2), 0, -Math.sqrt(2))
     );
     this.scene.addConstraint(slider.sliderConstraint);
-    slider.sliderConstraint.setLimits(-200, 200, 0, 0);
-  //      slider.sliderConstraint.setRestitution(0, 0);
+    slider.sliderConstraint.setLimits(0, 0, 0, 0);
+    slider.sliderConstraint.setRestitution(0, 0);
     this.sliders.push(slider);
     return slider;
   };
@@ -96,6 +96,10 @@
     );
     stick.originalposition = position;
     stick.position.copy(stick.originalposition);
+//    stick.rotation.x = Math.PI*0.5;
+//    stick.__dirtyRotation = true;
+//    stick.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0, height/2, 0));
+//    stick.quaternion.multiply((new THREE.Quaternion).setFromEuler(new THREE.Euler(Math.PI/2, 0, 0)));
     stick.receiveShadow = true;
     stick.castShadow = true;
     this.createLabel(text, new THREE.Vector3(stick.originalposition.x, stick.originalposition.y - height/2 - 14, stick.originalposition.z + radius), 14, 0xffffff);
