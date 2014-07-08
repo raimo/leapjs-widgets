@@ -5,7 +5,7 @@
   var KNOB_COLOR = 0xff2222;
   var KNOB_COLOR_ACTIVE = 0x81d41d;
 
-  var BACKGROUND_COLOR = 0x00aa00;
+  var BACKGROUND_COLOR = 0x000000;
 
   window.LeapWidgets = function (scene) {
     this.scene = scene;
