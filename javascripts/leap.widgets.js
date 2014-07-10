@@ -198,6 +198,9 @@
       stick.knob.material.color.setHex(impact ? KNOB_COLOR_ACTIVE : KNOB_COLOR);
       if (impact > impactThreshold) {
           var angle = Math.atan2(stick.position.z, stick.position.x) + Math.PI/2;
+          if (angle > Math.PI) {
+              angle -= Math.PI * 2;
+          }
           stick.dispatchEvent('control', {target: stick, angle: angle, impact: impact});
       }
       if (impact <= impactThreshold && stick.lastImpact > impactThreshold) {
