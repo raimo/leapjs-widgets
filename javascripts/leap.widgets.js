@@ -183,17 +183,27 @@
       var pressed = button.position.z+5 < button.originalposition.z;
       button.material.color.setHex(pressed ? BUTTON_COLOR_PRESSED : BUTTON_COLOR);
       if (!button.lastPressed && pressed) {
-          button.dispatchEvent('press', button);
+          button.dispatchEvent('press', {target: button});
       }
       if (button.lastPressed && !pressed) {
-          button.dispatchEvent('pressed', button);
+          button.dispatchEvent('pressed', {target: button});
       }
       button.lastPressed = pressed;
     });
     this.switches.forEach(function(stick) {
       stick.setLinearVelocity(new THREE.Vector3(0,1000,0));
       stick.setAngularVelocity(new THREE.Vector3(0,0,0));
-      stick.knob.material.color.setHex(Math.pow(stick.position.z-stick.originalposition.z, 2) + Math.pow(stick.position.x-stick.originalposition.x, 2) > 2 ? KNOB_COLOR_ACTIVE : KNOB_COLOR);
+      var impact = Math.pow(stick.position.z-stick.originalposition.z, 2) + Math.pow(stick.position.x-stick.originalposition.x, 2);
+      var impactThreshold = 2;
+      stick.knob.material.color.setHex(impact ? KNOB_COLOR_ACTIVE : KNOB_COLOR);
+      if (impact > impactThreshold) {
+          var angle = Math.atan2(stick.position.z, stick.position.x) + Math.PI/2;
+          stick.dispatchEvent('control', {target: stick, angle: angle, impact: impact});
+      }
+      if (impact <= impactThreshold && stick.lastImpact > impactThreshold) {
+          stick.dispatchEvent('reset', {target: stick});
+      }
+      stick.lastImpact = impact;
     });
   };
 })();

@@ -6,6 +6,7 @@
   <script type="text/javascript" src="../javascripts/lib/physi.js"></script>
   <script type="text/javascript" src="../javascripts/leap-0.6.1.min.js"></script>
   <script type="text/javascript" src="../javascripts/leap-plugins-0.1.6.min.js"></script>
+  <script type="text/javascript" src="../javascripts/lib/TrackballControls.js"></script>
   <script type="text/javascript" src="../javascripts/leap.widgets.js"></script>
 </head>
 <body>
@@ -123,7 +124,7 @@
     })
     .use('playback', {
       // This is a compressed JSON file of preprecorded frame data
-      recording: '../recordings/buttons.lz',
+      recording: '../recordings/knob.lz',
       // How long, in ms, between repeating the recording.
       timeBetweenLoops: 2000,
       pauseOnHand: true
@@ -137,6 +138,7 @@
       window.scene.addEventListener('update', function() {
         scene.simulate( undefined, 2 );
       });
+//      window.scene.setGravity({x:0,y:-100,z:0});
       window.scene.setGravity({x:0,y:0,z:0});
       window.renderer = new THREE.WebGLRenderer({
         alpha: true
@@ -158,16 +160,19 @@
 
       window.widgets = new LeapWidgets(window.scene);
 
-      widgets.createLabel("LeapJS Widgets - Buttons", new THREE.Vector3(0, 120, -110), 16, 0xffffff);
-      var counterLabel = widgets.createLabel("0", new THREE.Vector3(0, 0, -110), 16, 0xffffff);
       var wall = widgets.createWall(new THREE.Vector3(0, 0, -200), new THREE.Vector3(500, 300, 100));
-      var decreaseButton = widgets.createButton("Decrease", new THREE.Vector3(-100, 0, -110), new THREE.Vector3(100, 70, 30));
-      var increaseButton = widgets.createButton("Increase", new THREE.Vector3(100, 0, -110), new THREE.Vector3(100, 70, 30));
-      decreaseButton.addEventListener('press', function(evt) {
-        counterLabel.setText(parseInt(counterLabel.getText())-1);
+      var base = widgets.createWall(new THREE.Vector3(0, -50, -100), new THREE.Vector3(200, 50, 300));
+      var text = widgets.createLabel("LeapJS Widgets - Knob", new THREE.Vector3(0, wall.position.y+wall.geometry.parameters.height/2-16, wall.position.z+wall.geometry.parameters.depth/2+1), 16, 0xffffff);
+      var knob = widgets.createSwitch("Knob", new THREE.Vector3(base.position.x, base.position.y+base.geometry.parameters.height/2 + 50, base.position.z+80), 10, 100);
+      var angleLabel = widgets.createLabel("Up", new THREE.Vector3(-80, base.position.y, base.position.z+base.geometry.parameters.depth/2+1), 16, 0xffffff);
+      var impactLabel = widgets.createLabel("0", new THREE.Vector3(80, base.position.y, base.position.z+base.geometry.parameters.depth/2+1), 16, 0xffffff);
+      knob.addEventListener('control', function(evt) {
+          angleLabel.setText(Math.round(evt.angle*180/Math.PI) + '°');
+          impactLabel.setText(Math.round(evt.impact));
       });
-      increaseButton.addEventListener('press', function(evt) {
-        counterLabel.setText(parseInt(counterLabel.getText())+1);
+      knob.addEventListener('reset', function(evt) {
+          angleLabel.setText('Up');
+          impactLabel.setText('0');
       });
 
       var spotLight = new THREE.SpotLight(0xffffff, 1);
@@ -177,13 +182,13 @@
       spotLight.shadowMapHeight = 6048;
       spotLight.shadowCameraFar = 1000;
       spotLight.shadowDarkness = 0.5;
-      spotLight.position.fromArray([wall.position.x, wall.position.y, wall.position.z + 1000]);
+      spotLight.position.fromArray([wall.position.x, knob.position.y, wall.position.z + 1000]);
       spotLight.target.position.copy(wall.position);
       scene.add(spotLight);
 
       window.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
-      window.camera.position.fromArray([0, 0, 300]);
-      window.camera.lookAt(new THREE.Vector3(0, decreaseButton.position.y, decreaseButton.position.z));
+      window.camera.position.fromArray([0, wall.position.y+wall.geometry.parameters.height/3, 350]);
+      window.camera.lookAt(new THREE.Vector3(0, wall.position.y, wall.position.z));
 
       window.addEventListener('resize', function () {
         camera.aspect = window.innerWidth / window.innerHeight;
