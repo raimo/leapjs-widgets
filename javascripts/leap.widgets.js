@@ -59,11 +59,11 @@
 
   LeapWidgets.prototype.createSlider = function(text, position, dimensions) {
     var slider = new Physijs.BoxMesh(
-      new THREE.BoxGeometry(dimensions.x, dimensions.y, dimensions.z),
+      new THREE.BoxGeometry(50, dimensions.y, dimensions.z),
       Physijs.createMaterial(new THREE.MeshPhongMaterial({
         color: BUTTON_COLOR
-      }), 100, 0.9),
-      100
+      }), 1, 0),
+      350
     );
     slider.originalposition = position;
     slider.position.copy(slider.originalposition);
@@ -77,11 +77,10 @@
       slider,
       null,
       new THREE.Vector3().copy(slider.originalposition),
-      new THREE.Vector3(-Math.sqrt(2), 0, -Math.sqrt(2))
+      new THREE.Vector3(0, 1, 0)
     );
     this.scene.addConstraint(slider.sliderConstraint);
-    slider.sliderConstraint.setLimits(0, 0, 0, 0);
-    slider.sliderConstraint.setRestitution(0, 0);
+    slider.sliderConstraint.setLimits(-dimensions.x/2, dimensions.x/2, 0, 0);
     this.sliders.push(slider);
     return slider;
   };
