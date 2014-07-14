@@ -83,6 +83,8 @@
     );
     this.scene.addConstraint(slider.sliderConstraint);
     slider.sliderConstraint.setLimits(-dimensions.x/2, dimensions.x/2, 0, 0);
+    slider.position.x = slider.minposition +  (slider.maxposition - slider.minposition) * (initial/100);
+    slider.__dirtyPosition = true;
     this.sliders.push(slider);
     return slider;
   };

@@ -162,8 +162,8 @@
 
       widgets.createLabel("LeapJS Widgets - Slider", new THREE.Vector3(0, 120, -110), 16, 0xffffff);
       var wall = widgets.createWall(new THREE.Vector3(0, 0, -200), new THREE.Vector3(500, 300, 100));
-      var slider = widgets.createSlider("Slider", 50, new THREE.Vector3(0, 0, wall.position.z+wall.geometry.parameters.depth/2+20-0.3), new THREE.Vector3(200, 100, 50));
-      var counterLabel = widgets.createLabel("50%", new THREE.Vector3(0, 0, slider.geometry.parameters.depth/2+0.2), 16, 0xffffff, slider);
+      var slider = widgets.createSlider("Slider", 99.5, new THREE.Vector3(0, 0, wall.position.z+wall.geometry.parameters.depth/2+20-0.3), new THREE.Vector3(200, 100, 50));
+      var counterLabel = widgets.createLabel("0%", new THREE.Vector3(0, 0, slider.geometry.parameters.depth/2+0.2), 16, 0xffffff, slider);
       slider.addEventListener('change', function(evt) {
         counterLabel.setText(parseInt(evt.value*100) + '%');
       });
