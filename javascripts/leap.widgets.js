@@ -198,7 +198,7 @@
       stick.setAngularVelocity(new THREE.Vector3(0,0,0));
       var impact = Math.pow(stick.position.z-stick.originalposition.z, 2) + Math.pow(stick.position.x-stick.originalposition.x, 2);
       var impactThreshold = 2;
-      stick.knob.material.color.setHex(impact ? KNOB_COLOR_ACTIVE : KNOB_COLOR);
+      stick.knob.material.color.setHex(impact > impactThreshold ? KNOB_COLOR_ACTIVE : KNOB_COLOR);
       if (impact > impactThreshold) {
           var angle = Math.atan2(stick.position.z, stick.position.x) + Math.PI/2;
           if (angle > Math.PI) {
