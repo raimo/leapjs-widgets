@@ -57,7 +57,7 @@
     return button;
   };
 
-  LeapWidgets.prototype.createSlider = function(text, position, dimensions) {
+  LeapWidgets.prototype.createSlider = function(text, initial, position, dimensions) {
     var slider = new Physijs.BoxMesh(
       new THREE.BoxGeometry(50, dimensions.y, dimensions.z),
       Physijs.createMaterial(new THREE.MeshPhongMaterial({
@@ -65,7 +65,9 @@
       }), 1, 0),
       350
     );
-    slider.originalposition = position;
+    slider.originalposition = new THREE.Vector3(position.x, position.y, position.z);
+    slider.minposition = position.x - dimensions.x + slider.geometry.parameters.width*2;
+    slider.maxposition = position.x + dimensions.x - slider.geometry.parameters.width*2;
     slider.position.copy(slider.originalposition);
     slider.receiveShadow = true;
     slider.castShadow = true;
@@ -206,6 +208,13 @@
           stick.dispatchEvent('reset', {target: stick});
       }
       stick.lastImpact = impact;
+    });
+    this.sliders.forEach(function(slider) {
+      var value = Math.min(1, Math.max(0, Math.round((slider.position.x - slider.minposition) * 1000 / (slider.maxposition - slider.minposition)) / 1000));
+      if (slider.lastvalue != value) {
+          slider.dispatchEvent('change', {value: value});
+      }
+      slider.lastvalue = value;
     });
   };
 })();
