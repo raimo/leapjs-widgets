@@ -82,6 +82,7 @@
               Physijs.createMaterial(new THREE.MeshPhongMaterial(), 0, 0),
               100
           );
+        //  jointMesh.sticky = (finger.bones.length == i);
           jointMesh.castShadow = true;
           if (i === 0 && fingerIndex === 0) {
             jointMesh.visible = false;
@@ -174,6 +175,19 @@
           angleLabel.setText('Up');
           impactLabel.setText('0');
       });
+      //knob.addEventListener('collision', function(other_object, relative_velocity, relative_rotation, contact_normal) {
+      //    console.log(knob._physijs.touches);
+      //    knob.setLinearVelocity(new THREE.Vector3().copy(other_object.position));
+      //    if (other_object.sticky && !other_object.point && other_object instanceof Physijs.SphereMesh) {
+      //        other_object.material.color.setHex(0x00000e);
+      //        other_object.point = new Physijs.PointConstraint(
+      //          knob,
+      //          other_object,
+      //          new THREE.Vector3().copy(knob.position)
+      //        );
+      //        window.scene.addConstraint(other_object.point);
+      //    }
+      //});
 
       var spotLight = new THREE.SpotLight(0xffffff, 1);
       spotLight.shadowCameraVisible = true;
