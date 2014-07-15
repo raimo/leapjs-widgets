@@ -3,7 +3,7 @@
 <head>
   <title>Bone Hands - Leap</title>
   <script type="text/javascript" src="javascripts/three.r67.js"></script>
-  <script type="text/javascript"  src="javascripts/lib/physi.js"></script>
+  <script type="text/javascript" src="javascripts/lib/physi.js"></script>
   <script type="text/javascript" src="javascripts/leap-0.6.1.min.js"></script>
   <script type="text/javascript" src="javascripts/leap-plugins-0.1.6.min.js"></script>
   <script type="text/javascript" src="javascripts/lib/TrackballControls.js"></script>
@@ -125,7 +125,7 @@
     })
     .use('playback', {
       // This is a compressed JSON file of preprecorded frame data
-      recording: 'recordings/leap-playback-recording-110fps.json.lz',
+      recording: 'recordings/slider.lz',
       // How long, in ms, between repeating the recording.
       timeBetweenLoops: 2000,
       pauseOnHand: true
@@ -165,7 +165,7 @@
       var wall = widgets.createWall(new THREE.Vector3(0, 0, -200), new THREE.Vector3(500, 300, 100));
       var middlebutton = widgets.createButton("Button", new THREE.Vector3(-100, 80, -110), new THREE.Vector3(100, 70, 30));
 
-      widgets.createSlider("Slider", new THREE.Vector3(10, 80, -110), new THREE.Vector3(100, 30, 90));
+      widgets.createSlider("Slider", 50, new THREE.Vector3(10, 80, -110), new THREE.Vector3(100, 30, 90));
       widgets.createSwitch("Knob", new THREE.Vector3(100, wall.position.y+wall.geometry.parameters.height/2 + 50, wall.position.z), 10, 100);
 
       [
