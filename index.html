@@ -125,7 +125,7 @@
     })
     .use('playback', {
       // This is a compressed JSON file of preprecorded frame data
-      recording: 'recordings/slider.lz',
+      recording: 'recordings/knob.lz',
       // How long, in ms, between repeating the recording.
       timeBetweenLoops: 2000,
       pauseOnHand: true
@@ -161,34 +161,32 @@
 
       window.widgets = new LeapWidgets(window.scene);
 
-      widgets.createLabel("Dashboard", new THREE.Vector3(0, 140, -110), 16, 0x000000);
+      widgets.createLabel("LeapJS Widgets", new THREE.Vector3(0, 120, -110), 16, 0xffffff);
       var wall = widgets.createWall(new THREE.Vector3(0, 0, -200), new THREE.Vector3(500, 300, 100));
-      var middlebutton = widgets.createButton("Button", new THREE.Vector3(-100, 80, -110), new THREE.Vector3(100, 70, 30));
+      var buttons = widgets.createButton("Buttons", new THREE.Vector3(0, 70, -110), new THREE.Vector3(100, 70, 30));
+      var knob = widgets.createButton("Knob", new THREE.Vector3(0, -10, -110), new THREE.Vector3(100, 70, 30));
+      var slider = widgets.createButton("Slider", new THREE.Vector3(0, -90, -110), new THREE.Vector3(100, 70, 30));
 
-      widgets.createSlider("Slider", 50, new THREE.Vector3(10, 80, -110), new THREE.Vector3(100, 30, 90));
-      widgets.createSwitch("Knob", new THREE.Vector3(100, wall.position.y+wall.geometry.parameters.height/2 + 50, wall.position.z), 10, 100);
+      buttons.addEventListener('press', function(evt) { window.location = 'examples/buttons.html'; });
+      knob.addEventListener('press', function(evt) { window.location = 'examples/knob.html'; });
+      slider.addEventListener('press', function(evt) { window.location = 'examples/slider.html'; });
 
-      [
-//       [0, middlebutton.position.y + 300, 0],
-       [wall.position.x, wall.position.y, wall.position.z + 1000]
-      ].forEach(function(pos) {
-        var spotLight = new THREE.SpotLight(0xffffff, 1);
-        spotLight.shadowCameraVisible = true;
-        spotLight.castShadow = true;
-        spotLight.shadowMapWidth = 6048;
-        spotLight.shadowMapHeight = 6048;
-        spotLight.shadowCameraFar = 1000;
-        spotLight.shadowDarkness = 0.5;
-        spotLight.position.fromArray(pos);
-        spotLight.target.position.copy(wall.position);
-        scene.add(spotLight);
-      });
+      var spotLight = new THREE.SpotLight(0xffffff, 1);
+      spotLight.shadowCameraVisible = true;
+      spotLight.castShadow = true;
+      spotLight.shadowMapWidth = 6048;
+      spotLight.shadowMapHeight = 6048;
+      spotLight.shadowCameraFar = 1000;
+      spotLight.shadowDarkness = 0.5;
+      spotLight.position.fromArray([wall.position.x, wall.position.y, wall.position.z + 1000]);
+      spotLight.target.position.copy(wall.position);
+      scene.add(spotLight);
 
       window.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
-      window.camera.position.fromArray([0, 0, 200]);
-      window.camera.lookAt(new THREE.Vector3(0, middlebutton.position.y, middlebutton.position.z));
+      window.camera.position.fromArray([0, 0, 250]);
+      window.camera.lookAt(new THREE.Vector3(0, wall.position.y, wall.position.z));
       window.controls = new THREE.TrackballControls( camera );
-      window.controls.target = new THREE.Vector3().fromArray([0, middlebutton.position.y, middlebutton.position.z]);
+      window.controls.target = new THREE.Vector3().fromArray([0, wall.position.y, wall.position.z]);
 
       window.addEventListener('resize', function () {
         controls.handleResize();
