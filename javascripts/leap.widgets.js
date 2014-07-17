@@ -13,6 +13,130 @@
     this.switches = [];
     this.sliders = [];
   }
+  LeapWidgets.prototype.initLeapHand = function(sampleRecording) {
+    var baseBoneRotation = (new THREE.Quaternion).setFromEuler(
+        new THREE.Euler(Math.PI / 2, 0, 0)
+    );
+    var boneWidthDefault = 10; // TODO not returned by recorder yet.
+    Leap.loop({
+      frame: function() {
+        widgets.update();
+        scene.simulate();
+        renderer.render(scene, camera);
+      },
+      hand: function (hand) {
+
+        hand.fingers.forEach(function (finger) {
+
+          finger.data('boneMeshes').forEach(function(mesh, i){
+            var bone = finger.bones[i];
+            var bonePosition = new THREE.Vector3().fromArray(bone.center());
+            bonePosition.y -= 130;
+            bonePosition.z += 80;
+            mesh.setLinearVelocity(bonePosition.sub(mesh.position).multiplyScalar(16));
+            mesh.setRotationFromMatrix(new THREE.Matrix4().fromArray(bone.matrix()));
+            mesh.quaternion.multiply(baseBoneRotation);
+            mesh.__dirtyRotation = true;
+          });
+
+          finger.data('jointMeshes').forEach(function(mesh, i){
+            var bone = finger.bones[i];
+            var jointPosition = new THREE.Vector3().fromArray(bone ? bone.prevJoint : finger.bones[i-1].nextJoint);
+            jointPosition.y -= 130;
+            jointPosition.z += 80;
+            mesh.setLinearVelocity(jointPosition.sub(mesh.position).multiplyScalar(20));
+            mesh.setAngularVelocity(new THREE.Vector3());
+          });
+
+        });
+      }
+    })
+      // these two LeapJS plugins, handHold and handEntry are available from leapjs-plugins, included above.
+      // handHold provides hand.data
+      // handEntry provides handFound/handLost events.
+    .use('handHold')
+    .use('handEntry')
+    .on('handFound', function(hand){
+      hand.fingers.forEach(function (finger, fingerIndex) {
+
+        var boneMeshes = [];
+        var jointMeshes = [];
+
+        finger.bones.forEach(function(bone, boneIndex) {
+          var boneWidth = bone.width || boneWidthDefault;
+          var boneMesh = new Physijs.CylinderMesh(
+              new THREE.CylinderGeometry(boneWidth/2, boneWidth/2, bone.length - boneWidth),
+              Physijs.createMaterial(new THREE.MeshPhongMaterial(), 0, 0),
+              100
+          );
+          // TODO: why does the thumb have this extra bone? Removing it
+          if (boneIndex === 0 && fingerIndex === 0) {
+            boneMesh.visible = false;
+            boneMesh.mass = 0;
+          }
+          boneMesh.castShadow = true;
+          scene.add(boneMesh);
+          boneMeshes.push(boneMesh);
+        });
+
+        for (var i = 0; i < finger.bones.length + 1; i++) {
+          var jointMesh = new Physijs.SphereMesh(
+              new THREE.SphereGeometry(((finger.bones[i] || finger.bones[i-1]).width || boneWidthDefault)/2, 16),
+              Physijs.createMaterial(new THREE.MeshPhongMaterial(), 0, 0),
+              100
+          );
+        //  jointMesh.sticky = (finger.bones.length == i);
+          jointMesh.castShadow = true;
+          if (i === 0 && fingerIndex === 0) {
+            jointMesh.visible = false;
+            jointMesh.mass = 0;
+          }
+
+          jointMesh.material.color.setHex(0x0088ce);
+          scene.add(jointMesh);
+          jointMeshes.push(jointMesh);
+        }
+
+
+        finger.data('boneMeshes', boneMeshes);
+        finger.data('jointMeshes', jointMeshes);
+
+      });
+
+    })
+    .on('handLost', function(hand){
+
+      hand.fingers.forEach(function (finger) {
+
+        var boneMeshes = finger.data('boneMeshes');
+        var jointMeshes = finger.data('jointMeshes');
+
+        boneMeshes.forEach(function(mesh){
+          scene.remove(mesh);
+        });
+
+        jointMeshes.forEach(function(mesh){
+          scene.remove(mesh);
+        });
+
+        finger.data({
+          boneMeshes: null,
+          boneMeshes: null
+        });
+
+      });
+    })
+    .use('playback', {
+      // This is a compressed JSON file of preprecorded frame data
+      recording: sampleRecording,
+      // How long, in ms, between repeating the recording.
+      timeBetweenLoops: 2000,
+      pauseOnHand: true
+    })
+    .connect();
+
+
+  };
 
   LeapWidgets.prototype.createWall = function(position, dimensions) {
     var wall = new Physijs.BoxMesh(
