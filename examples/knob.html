@@ -38,7 +38,7 @@
       document.body.appendChild(window.renderer.domElement);
 
       window.widgets = new LeapWidgets(window.scene);
-      widgets.initLeapHand('../recordings/knob.lz');
+      widgets.initLeapHand({sampleRecording: '../recordings/knob.lz'});
 
       var wall = widgets.createWall(new THREE.Vector3(0, 0, -200), new THREE.Vector3(500, 300, 100));
       var base = widgets.createWall(new THREE.Vector3(0, -50, -100), new THREE.Vector3(200, 50, 300));

@@ -36,7 +36,7 @@
       document.body.appendChild(window.renderer.domElement);
 
       window.widgets = new LeapWidgets(window.scene);
-      widgets.initLeapHand('../recordings/buttons.lz');
+      widgets.initLeapHand({sampleRecording: '../recordings/buttons.lz'});
 
       widgets.createLabel("LeapJS Widgets - Buttons", new THREE.Vector3(0, 120, -110), 16, 0xffffff);
       var counterLabel = widgets.createLabel("0", new THREE.Vector3(0, 0, -110), 16, 0xffffff);

@@ -13,7 +13,10 @@
     this.switches = [];
     this.sliders = [];
   }
-  LeapWidgets.prototype.initLeapHand = function(sampleRecording) {
+  LeapWidgets.prototype.initLeapHand = function(opts) {
+    opts = opts || {};
+    var sampleRecording = opts['sampleRecording'];
+    var scale = opts['scale'] || 1;
     var baseBoneRotation = (new THREE.Quaternion).setFromEuler(
         new THREE.Euler(Math.PI / 2, 0, 0)
     );
@@ -30,9 +33,9 @@
 
           finger.data('boneMeshes').forEach(function(mesh, i){
             var bone = finger.bones[i];
-            var bonePosition = new THREE.Vector3().fromArray(bone.center());
-            bonePosition.y -= 130;
-            bonePosition.z += 80;
+            var bonePosition = new THREE.Vector3().fromArray(bone.center()).multiplyScalar(scale);
+            bonePosition.y -= 130 * scale;
+            bonePosition.z += 80 * scale;
             mesh.setLinearVelocity(bonePosition.sub(mesh.position).multiplyScalar(16));
             mesh.setRotationFromMatrix(new THREE.Matrix4().fromArray(bone.matrix()));
             mesh.quaternion.multiply(baseBoneRotation);
@@ -41,9 +44,9 @@
 
           finger.data('jointMeshes').forEach(function(mesh, i){
             var bone = finger.bones[i];
-            var jointPosition = new THREE.Vector3().fromArray(bone ? bone.prevJoint : finger.bones[i-1].nextJoint);
-            jointPosition.y -= 130;
-            jointPosition.z += 80;
+            var jointPosition = new THREE.Vector3().fromArray(bone ? bone.prevJoint : finger.bones[i-1].nextJoint).multiplyScalar(scale);
+            jointPosition.y -= 130 * scale;
+            jointPosition.z += 80 * scale;
             mesh.setLinearVelocity(jointPosition.sub(mesh.position).multiplyScalar(20));
             mesh.setAngularVelocity(new THREE.Vector3());
           });
@@ -65,7 +68,7 @@
         finger.bones.forEach(function(bone, boneIndex) {
           var boneWidth = bone.width || boneWidthDefault;
           var boneMesh = new Physijs.CylinderMesh(
-              new THREE.CylinderGeometry(boneWidth/2, boneWidth/2, bone.length - boneWidth),
+              new THREE.CylinderGeometry(boneWidth/2 * scale, boneWidth/2 * scale, (bone.length - boneWidth) * scale),
               Physijs.createMaterial(new THREE.MeshPhongMaterial(), 0, 0),
               100
           );
@@ -75,18 +78,20 @@
             boneMesh.mass = 0;
           }
           boneMesh.castShadow = true;
+          boneMesh.position.fromArray([0,100,0]);
           scene.add(boneMesh);
           boneMeshes.push(boneMesh);
         });
 
         for (var i = 0; i < finger.bones.length + 1; i++) {
           var jointMesh = new Physijs.SphereMesh(
-              new THREE.SphereGeometry(((finger.bones[i] || finger.bones[i-1]).width || boneWidthDefault)/2, 16),
+              new THREE.SphereGeometry(((finger.bones[i] || finger.bones[i-1]).width || boneWidthDefault)/2 * scale, 16),
               Physijs.createMaterial(new THREE.MeshPhongMaterial(), 0, 0),
               100
           );
         //  jointMesh.sticky = (finger.bones.length == i);
           jointMesh.castShadow = true;
+          jointMesh.position.fromArray([0,100,0]);
           if (i === 0 && fingerIndex === 0) {
             jointMesh.visible = false;
             jointMesh.mass = 0;
