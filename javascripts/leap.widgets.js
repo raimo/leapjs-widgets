@@ -34,8 +34,9 @@
           finger.data('boneMeshes').forEach(function(mesh, i){
             var bone = finger.bones[i];
             var bonePosition = new THREE.Vector3().fromArray(bone.center()).multiplyScalar(scale);
-            bonePosition.y -= 130 * scale;
-            bonePosition.z += 80 * scale;
+            bonePosition.y -= (opts['translateY'] || 130) * scale;
+            bonePosition.x += (opts['translateX'] || 0) * scale;
+            bonePosition.z += (opts['translateZ'] || 80) * scale;
             mesh.setLinearVelocity(bonePosition.sub(mesh.position).multiplyScalar(16));
             mesh.setRotationFromMatrix(new THREE.Matrix4().fromArray(bone.matrix()));
             mesh.quaternion.multiply(baseBoneRotation);
