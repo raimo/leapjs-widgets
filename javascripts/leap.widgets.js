@@ -34,9 +34,12 @@
           finger.data('boneMeshes').forEach(function(mesh, i){
             var bone = finger.bones[i];
             var bonePosition = new THREE.Vector3().fromArray(bone.center()).multiplyScalar(scale);
-            bonePosition.y -= (opts['translateY'] || 130) * scale;
-            bonePosition.x += (opts['translateX'] || 0) * scale;
-            bonePosition.z += (opts['translateZ'] || 80) * scale;
+            bonePosition.y *= scale;
+            bonePosition.x *= scale;
+            bonePosition.z *= scale;
+            bonePosition.y += opts['translateY'] || -130;
+            bonePosition.x += opts['translateX'] || 0;
+            bonePosition.z += opts['translateZ'] || 80;
             mesh.setLinearVelocity(bonePosition.sub(mesh.position).multiplyScalar(16));
             mesh.setRotationFromMatrix(new THREE.Matrix4().fromArray(bone.matrix()));
             mesh.quaternion.multiply(baseBoneRotation);
@@ -46,8 +49,12 @@
           finger.data('jointMeshes').forEach(function(mesh, i){
             var bone = finger.bones[i];
             var jointPosition = new THREE.Vector3().fromArray(bone ? bone.prevJoint : finger.bones[i-1].nextJoint).multiplyScalar(scale);
-            jointPosition.y -= 130 * scale;
-            jointPosition.z += 80 * scale;
+            jointPosition.y *= scale;
+            jointPosition.x *= scale;
+            jointPosition.z *= scale;
+            jointPosition.y += opts['translateY'] || -130;
+            jointPosition.x += opts['translateX'] || 0;
+            jointPosition.z += opts['translateZ'] || 80;
             mesh.setLinearVelocity(jointPosition.sub(mesh.position).multiplyScalar(20));
             mesh.setAngularVelocity(new THREE.Vector3());
           });
@@ -69,7 +76,7 @@
         finger.bones.forEach(function(bone, boneIndex) {
           var boneWidth = bone.width || boneWidthDefault;
           var boneMesh = new Physijs.CylinderMesh(
-              new THREE.CylinderGeometry(boneWidth/2 * scale, boneWidth/2 * scale, (bone.length - boneWidth) * scale),
+              new THREE.CylinderGeometry(boneWidth/2 * scale, boneWidth/2 * scale, (bone.length * scale)),
               Physijs.createMaterial(new THREE.MeshPhongMaterial(), 0, 0),
               100
           );
@@ -174,15 +181,16 @@
 
     this.createLabel(text, new THREE.Vector3(0, 0, dimensions.z/2+1), 14, 0xffffff, button);
 
-    button.sliderConstraint = new Physijs.SliderConstraint(
+    button.buttonPushConstraint = new Physijs.SliderConstraint(
       button,
       null,
       new THREE.Vector3(0, 0, -200),
-      new THREE.Vector3(0, Math.sqrt(2), Math.sqrt(2))
+      //new THREE.Vector3(0, Math.sqrt(2), Math.sqrt(2))
+      new THREE.Vector3(0, 1, 0)
     );
-    this.scene.addConstraint(button.sliderConstraint);
-    button.sliderConstraint.setLimits(-150, 0, 0, 0);
-  //      button.sliderConstraint.setRestitution(0, 0);
+    this.scene.addConstraint(button.buttonPushConstraint);
+    button.buttonPushConstraint.setLimits(-150, 0, 0, 0);
+  //      button.buttonPushConstraint.setRestitution(0, 0);
     this.buttons.push(button);
     return button;
   };
@@ -196,8 +204,8 @@
       350
     );
     slider.originalposition = new THREE.Vector3(position.x, position.y, position.z);
-    slider.minposition = position.x - dimensions.x + slider.geometry.parameters.width*2;
-    slider.maxposition = position.x + dimensions.x - slider.geometry.parameters.width*2;
+    slider.minposition = -100000; //position.x - dimensions.x + slider.geometry.parameters.width*2;
+    slider.maxposition = 100000; //position.x + dimensions.x - slider.geometry.parameters.width*2;
     slider.position.copy(slider.originalposition);
     slider.receiveShadow = true;
     slider.castShadow = true;
@@ -209,12 +217,13 @@
       slider,
       null,
       new THREE.Vector3().copy(slider.originalposition),
-      new THREE.Vector3(0, 1, 0)
+      //new THREE.Vector3(0, 1, 0)
+      new THREE.Vector3(0, 0, 1)
     );
     this.scene.addConstraint(slider.sliderConstraint);
     slider.sliderConstraint.setLimits(-dimensions.x/2, dimensions.x/2, 0, 0);
-    slider.position.x = slider.minposition +  (slider.maxposition - slider.minposition) * (initial/100);
-    slider.__dirtyPosition = true;
+    //slider.position.x = slider.minposition +  (slider.maxposition - slider.minposition) * (initial/100);
+    //slider.__dirtyPosition = true;
     this.sliders.push(slider);
     return slider;
   };

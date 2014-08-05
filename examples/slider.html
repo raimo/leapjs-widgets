@@ -38,11 +38,12 @@
       document.body.appendChild(window.renderer.domElement);
 
       window.widgets = new LeapWidgets(window.scene);
-      widgets.initLeapHand({sampleRecording: '../recordings/slider.lz'});
+      var translate = 2000;
+      widgets.initLeapHand({sampleRecording: '../recordings/slider.lz', translateY: translate+300});
 
       widgets.createLabel("LeapJS Widgets - Slider", new THREE.Vector3(0, 120, -110), 16, 0xffffff);
-      var wall = widgets.createWall(new THREE.Vector3(0, 0, -200), new THREE.Vector3(500, 300, 100));
-      var slider = widgets.createSlider("Slider", 99.5, new THREE.Vector3(0, 0, wall.position.z+wall.geometry.parameters.depth/2+20-0.3), new THREE.Vector3(200, 100, 50));
+      var wall = widgets.createWall(new THREE.Vector3(0, 220, -200), new THREE.Vector3(500, 300, 100));
+      window.slider = widgets.createSlider("Slider", 50, new THREE.Vector3(-translate, 0, 0), new THREE.Vector3(200, 100, 50));
       var counterLabel = widgets.createLabel("0%", new THREE.Vector3(0, 0, slider.geometry.parameters.depth/2+0.2), 16, 0xffffff, slider);
       slider.addEventListener('change', function(evt) {
         counterLabel.setText(parseInt(evt.value*100) + '%');
@@ -56,14 +57,14 @@
       spotLight.shadowCameraFar = 1000;
       spotLight.shadowDarkness = 0.5;
       spotLight.position.fromArray([wall.position.x, wall.position.y, wall.position.z + 1000]);
-      spotLight.target.position.copy(wall.position);
+      spotLight.target.position.copy(slider.position);
       scene.add(spotLight);
 
       window.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
-      window.camera.position.fromArray([0, 0, 300]);
+      window.camera.position.fromArray([0, -translate, 300]);
       window.camera.lookAt(new THREE.Vector3(0, slider.position.y, slider.position.z));
-      window.controls = new THREE.TrackballControls( camera );
-      window.controls.target = new THREE.Vector3(0, slider.position.y, slider.position.z);
+      //window.controls = new THREE.TrackballControls( camera );
+      //window.controls.target = new THREE.Vector3(0, slider.position.y, slider.position.z);
 
       window.addEventListener('resize', function () {
         window.controls && controls.handleResize();
