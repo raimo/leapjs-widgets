@@ -8,6 +8,9 @@
   <script type="text/javascript" src="javascripts/leap-plugins-0.1.6.min.js"></script>
   <script type="text/javascript" src="javascripts/lib/TrackballControls.js"></script>
   <script type="text/javascript" src="javascripts/leap.widgets.js"></script>
+  <script type="text/javascript" src="javascripts/lib/OculusRiftEffect.js"></script>
+  <script type="text/javascript" src="javascripts/lib/OculusControls.js"></script>
+  <style type="text/css">#connect-leap{display: none;}</style>
 </head>
 <body>
   <script type="text/javascript">
@@ -18,9 +21,11 @@
     Leap.loop({
       frame: function() {
         controls.update();
+        oculuscontrol.update();
         widgets.update();
         scene.simulate();
-        renderer.render(scene, camera);
+        //renderer.render(scene, camera);
+        effect.render(scene, camera);
       },
       hand: function (hand) {
 
@@ -123,13 +128,13 @@
 
       });
     })
-    .use('playback', {
-      // This is a compressed JSON file of preprecorded frame data
-      recording: 'recordings/knob.lz',
-      // How long, in ms, between repeating the recording.
-      timeBetweenLoops: 2000,
-      pauseOnHand: true
-    })
+//    .use('playback', {
+//      // This is a compressed JSON file of preprecorded frame data
+//      recording: 'recordings/slider.lz',
+//      // How long, in ms, between repeating the recording.
+//      timeBetweenLoops: 2000,
+//      pauseOnHand: true
+//    })
     .connect();
 
 
@@ -157,6 +162,10 @@
       window.renderer.domElement.style.width = '100%';
       window.renderer.domElement.style.height = '100%';
 
+      window.effect = new THREE.OculusRiftEffect(window.renderer, { worldScale: 2 } );
+      window.effect.setSize( window.innerWidth, window.innerHeight );
+
+
       document.body.appendChild(window.renderer.domElement);
 
       window.widgets = new LeapWidgets(window.scene);
@@ -172,7 +181,7 @@
       slider.addEventListener('press', function(evt) { window.location = 'examples/slider.html'; });
 
       var spotLight = new THREE.SpotLight(0xffffff, 1);
-      spotLight.shadowCameraVisible = true;
+      //spotLight.shadowCameraVisible = true;
       spotLight.castShadow = true;
       spotLight.shadowMapWidth = 6048;
       spotLight.shadowMapHeight = 6048;
@@ -183,8 +192,11 @@
       scene.add(spotLight);
 
       window.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
-      window.camera.position.fromArray([0, 0, 250]);
+      window.camera.position.fromArray([0, 0, 200]);
       window.camera.lookAt(new THREE.Vector3(0, wall.position.y, wall.position.z));
+
+      window.oculuscontrol = new THREE.OculusControls( camera );
+
       window.controls = new THREE.TrackballControls( camera );
       window.controls.target = new THREE.Vector3().fromArray([0, wall.position.y, wall.position.z]);
 
@@ -193,9 +205,10 @@
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.render(scene, camera);
+        //renderer.render(scene, camera);
+        effect.render(scene, camera);
       }, false);
-
+      window.oculuscontrol.connect();
       scene.add(camera);
     };
 
